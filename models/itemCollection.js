@@ -26,6 +26,11 @@ const itemSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
+    vendorID: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User"
+    }
   },
   {
     timestamps: true,

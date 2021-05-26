@@ -1,0 +1,25 @@
+<%- include("./partials/header") %>
+    <%- include("./partials/heading") %>
+
+        <hr>
+        <div class="signup-form">
+            <form action="/signup" method="POST">
+                <h2>Sign Up</h2>
+                <hr>
+                <div class="form-group">
+                    <input type="email" class="form-control" name="email" placeholder="Email" required="required">
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" name="password" placeholder="Password"
+                        required="required">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">Sign Up</button>
+                </div>
+            </form>
+        </div>
+        <div class="text-center">
+            <h6>Already have an account? Please, <a href="/signin">sign in.</a></h6>
+            <br>
+            <a class="btn btn-primary btn-lg" href="/items">GO BACK TO HOME</a>
+        </div>
