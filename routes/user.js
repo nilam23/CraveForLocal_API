@@ -6,6 +6,8 @@ const Item = require("../models/itemCollection");
 const User = require("../models/userCollection");
 const Order = require("../models/orderCollection");
 
+const indexObj = require("./index");
+
 router.get("/items", async (req, res) => {
     try {
         const items = await Item.find();
@@ -19,7 +21,7 @@ router.get("/items/seemore", (req, res) => {
     res.render("user/itemDetails");
 });
 
-router.get("/items/cart", (req, res) => {
+router.get("/items/cart", indexObj.isLoggedin, (req, res) => {
     res.render("user/cart");
 });
 

@@ -242,7 +242,7 @@
 }    
 .signup-form {
 	width: 400px;
-	margin: 0 auto;
+	margin: auto;
 	padding: 30px 0;
 }	
 .signup-form form {
@@ -291,4 +291,17 @@
 }	
 .signup-form form a:hover {
 	text-decoration: underline;
+}
+
+@media (max-width: 400px){
+    .signup-form{
+        width: 100%;
+    }
+}
+
+/* FLASH MESSAGES */
+@media (max-width: 500px){
+    .alert-message{
+        font-size: small;
+    }
 }

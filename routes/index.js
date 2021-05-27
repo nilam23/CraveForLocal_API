@@ -4,14 +4,20 @@ const router = express.Router();
 
 const User = require("../models/userCollection");
 
-// const isLoggedIn
+const isLoggedin = (req, res, next) => {
+    if (req.session.user_id) {
+        return next();
+    }
+    res.redirect("/signin");
+};
 
 router.get("/", (req, res) => {
+    console.log(res.locals);
     res.render("landing");
 });
 
 router.get("/signup", (req, res) => {
-    res.render("signupForm");
+    res.render("signupForm", { message: res.locals.message });
 });
 
 router.post("/signup", async (req, res) => {
@@ -26,9 +32,17 @@ router.post("/signup", async (req, res) => {
                 userType: "user"
             });
             await newUser.save();
-            res.send("Success");
+            req.session.message = {
+                type: "success",
+                content: "You've successfully signed up. Please log in now."
+            };
+            res.redirect("/signin");
         } else {
-            res.send("User already exists.");
+            req.session.message = {
+                type: "danger",
+                content: "User already exists. Please log in."
+            };
+            res.redirect("/signin");
         }
     } catch (err) {
         console.log(`---SIGN UP ERROR: ${err}.---`);
@@ -37,7 +51,7 @@ router.post("/signup", async (req, res) => {
 });
 
 router.get("/signin", (req, res) => {
-    res.render("signinForm");
+    res.render("signinForm", { message: res.locals.message });
 });
 
 router.post("/signin", async (req, res) => {
@@ -45,10 +59,15 @@ router.post("/signin", async (req, res) => {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
         if (!user) {
-            res.send("Incorrect email or password.");
+            req.session.message = {
+                type: "danger",
+                content: "Incorrect email or password."
+            };
+            res.redirect("/signin");
         } else {
             const validation = await bcrypt.compare(password, user.password);
             if (validation) {
+                req.session.user_id = user._id;
                 var userType = user.userType;
                 if (userType == "user") {
                     res.redirect("/items");
@@ -58,7 +77,11 @@ router.post("/signin", async (req, res) => {
                     res.send("Vendor Page");
                 }
             } else {
-                res.send("Incorrect email or password.");
+                req.session.message = {
+                    type: "danger",
+                    content: "Incorrect email or password."
+                };
+                res.redirect("/signin");
             }
         }
     } catch (err) {
@@ -93,4 +116,10 @@ router.post("/admin/vendors/new", async (req, res) => {
     }
 });
 
+router.post("/logout", (req, res) => {
+    req.session.user_id = null;
+    res.redirect("/items");
+});
+
 module.exports = router;
+module.exports.isLoggedin = isLoggedin;
