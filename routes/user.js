@@ -11,7 +11,7 @@ const indexObj = require("./index");
 router.get("/items", async (req, res) => {
     try {
         const items = await Item.find();
-        res.render("user/home");
+        res.render("user/home", { message: res.locals.message });
     } catch (error) {
         res.status(404).json("failed");
     }

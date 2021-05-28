@@ -25,19 +25,20 @@ router.get("/signup", (req, res) => {
 
 router.post("/signup", async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { name, email, password } = req.body;
         const user = await User.findOne({ email });
         if (!user) {
-            var hashedPassword = await bcrypt.hash(password, process.env.BCRYPT_SALT);
+            var hashedPassword = await bcrypt.hash(password, 12);
             const newUser = new User({
+                name,
                 email,
                 password: hashedPassword,
-                userType: "user"
+                userType: "admin"
             });
             await newUser.save();
             req.session.message = {
                 type: "success",
-                content: "You've successfully signed up. Please log in now."
+                content: `Hi ${name.split(' ')[0]}, you've successfully signed up. Please log in now.`
             };
             res.redirect("/signin");
         } else {
@@ -73,6 +74,10 @@ router.post("/signin", async (req, res) => {
                 req.session.user_id = user._id;
                 var userType = user.userType;
                 if (userType == "user") {
+                    req.session.message = {
+                        type: "success",
+                        content: `Welcome back ${user.name.split(' ')[0]}`
+                    };
                     res.redirect("/items");
                 } else if (userType == "admin") {
                     res.send("Admin Page");
