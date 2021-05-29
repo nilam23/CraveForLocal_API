@@ -9,6 +9,7 @@ const Order = require("../models/orderCollection");
 const indexObj = require("./index");
 
 router.get("/items", async (req, res) => {
+    console.log(req.session.user_id);
     try {
         const items = await Item.find();
         res.render("user/home", { message: res.locals.message });

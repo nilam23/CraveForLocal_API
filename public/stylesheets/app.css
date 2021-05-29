@@ -305,3 +305,19 @@
         font-size: small;
     }
 }
+
+/* EMAIL CONFIRMATION */
+.confirmation {
+    text-align: center;
+    margin-top: 100px;
+    margin-left: 50px;
+        margin-right: 50px;
+    border: 1px solid lightgray;
+}
+
+@media (max-width: 576px){
+    .confirmation{
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+}

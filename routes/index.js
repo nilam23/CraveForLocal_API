@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
+const mailScript = require("../mailScript");
 
 const User = require("../models/userCollection");
 
@@ -20,7 +21,7 @@ router.get("/", (req, res) => {
 });
 
 router.get("/signup", (req, res) => {
-    res.render("signupForm", { message: res.locals.message });
+    res.render("signupForm");
 });
 
 router.post("/signup", async (req, res) => {
@@ -44,7 +45,7 @@ router.post("/signup", async (req, res) => {
         } else {
             req.session.message = {
                 type: "danger",
-                content: "User already exists. Please log in."
+                content: "User already exists. Please sign in."
             };
             res.redirect("/signin");
         }
@@ -55,7 +56,7 @@ router.post("/signup", async (req, res) => {
 });
 
 router.get("/signin", (req, res) => {
-    res.render("signinForm", { message: res.locals.message });
+    res.render("signinForm");
 });
 
 router.post("/signin", async (req, res) => {
@@ -76,7 +77,7 @@ router.post("/signin", async (req, res) => {
                 if (userType == "user") {
                     req.session.message = {
                         type: "success",
-                        content: `Welcome back ${user.name.split(' ')[0]}`
+                        content: `Welcome back ${user.name.split(' ')[0]}.`
                     };
                     res.redirect("/items");
                 } else if (userType == "admin") {
@@ -144,7 +145,6 @@ router.post("/forgotpassword", async (req, res) => {
             };
             res.redirect("/signup");
         } else {
-            //Creating a one time link valid for a specific amount of time
             const secret = JWT_SECRET + user.password;
             const payload = {
                 email: user.email,
@@ -152,9 +152,15 @@ router.post("/forgotpassword", async (req, res) => {
             };
             const token = jwt.sign(payload, secret, { expiresIn: '15m' });
             const link = `http://localhost:3000/resetpassword/${user._id}/${token}`;
-            //send this link to user via email
+            const mailOptions = {
+                from: `${process.env.ADMIN_NAME} <${process.env.ADMIN_EMAIL}>`,
+                to: `${user.email}`,
+                subject: 'Crave For Local: Email verification link for password reset.',
+                text: `To reset your email, please click on the this link: ${link}`
+            };
+            // mailScript.transporter.sendMail(mailOptions, (err, info) => console.log(`---EMAIL ERROR: ${err}.---`));
             console.log(link);
-            res.send("Password Reset link sent to your email.");
+            res.render("emailConfirmation");
         }
 
     } catch (err) {
@@ -167,15 +173,15 @@ router.get("/resetpassword/:id/:token", async (req, res) => {
     const { id, token } = req.params;
     const user = await User.findOne({ _id: id });
     if (!user) {
-        res.send("Invalid user.");
+        res.render("emailVerificationFailure");
     } else {
         const secret = JWT_SECRET + user.password;
         try {
             const payload = jwt.verify(token, secret);
-            res.render("resetPasswordForm", { email: user.email });
+            res.render("resetPasswordForm");
         } catch (error) {
             console.log(`---FORGOT PASSWORD ERROR: ${error}.---`);
-            res.render("")
+            res.render("/forgotPassword");
         }
     }
 });
@@ -185,7 +191,7 @@ router.post("/resetpassword/:id/:token", async (req, res) => {
     const { password, confirmedPassword } = req.body;
     const user = await User.findOne({ _id: id });
     if (!user) {
-        res.send("Invalid user.");
+        res.render("passwordResetFailure");
     } else {
         const secret = JWT_SECRET + user.password;
         try {
@@ -195,6 +201,12 @@ router.post("/resetpassword/:id/:token", async (req, res) => {
                 user.password = newHashedPassword;
                 await user.save();
                 res.redirect("/signin");
+            } else {
+                req.session.message = {
+                    type: "danger",
+                    content: "Your password didn't match. Try again."
+                }
+                res.redirect("/forgotPassword");
             }
         } catch (err) {
             console.log(`---PASSWORD RESET ERROR: ${err}.---`);
