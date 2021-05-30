@@ -16,7 +16,6 @@ const isLoggedin = (req, res, next) => {
 };
 
 router.get("/", (req, res) => {
-    console.log(res.locals);
     res.render("landing");
 });
 
@@ -30,11 +29,12 @@ router.post("/signup", async (req, res) => {
         const user = await User.findOne({ email });
         if (!user) {
             var hashedPassword = await bcrypt.hash(password, 12);
+            // var hashedPassword = password;
             const newUser = new User({
                 name,
                 email,
                 password: hashedPassword,
-                userType: "admin"
+                userType: "user"
             });
             await newUser.save();
             req.session.message = {
@@ -72,6 +72,7 @@ router.post("/signin", async (req, res) => {
         } else {
             const validation = await bcrypt.compare(password, user.password);
             if (validation) {
+                // if (password == user.password) {
                 req.session.user_id = user._id;
                 var userType = user.userType;
                 if (userType == "user") {
@@ -79,7 +80,7 @@ router.post("/signin", async (req, res) => {
                         type: "success",
                         content: `Welcome back ${user.name.split(' ')[0]}.`
                     };
-                    res.redirect("/items");
+                    res.redirect("/home");
                 } else if (userType == "admin") {
                     res.send("Admin Page");
                 } else {
@@ -127,7 +128,7 @@ router.post("/admin/vendors/new", async (req, res) => {
 
 router.post("/logout", (req, res) => {
     req.session.user_id = null;
-    res.redirect("/items");
+    res.redirect("/home");
 });
 
 router.get("/forgotpassword", (req, res) => {

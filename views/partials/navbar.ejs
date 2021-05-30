@@ -1,9 +1,16 @@
 <div class="topnav" id="myTopnav">
-    <a href="#home" class="active">Home</a>
-    <a href="#news">Wishlist</a>
-    <a href="#contact">Cart</a>
-    <a href="#about">About</a>
-    <a href="javascript:void(0);" class="icon" onclick="myFunction()">
-        <i class="fa fa-bars"></i>
-    </a>
+    <a id="link-decoration" href="/home" class="active">Home</a>
+    <a id="link-decoration" href="#">Wishlist</a>
+    <a id="link-decoration" href="/cart">Cart</a>
+    <% if(!currentUser) { %>
+        <a id="link-decoration" href="/signin">Log in</a>
+        <% }else{ %>
+            <div class="dropdown">
+                <form action="/logout" method="POST">
+                    <button class="dropbtn">Log out</button>
+                </form>
+            </div>
+            <% } %>
+                <a id="link-decoration" href="javascript:void(0);" style="font-size:15px;" class="icon"
+                    onclick="myFunction()">&#9776;</a>
 </div>

@@ -8,21 +8,22 @@ const Order = require("../models/orderCollection");
 
 const indexObj = require("./index");
 
-router.get("/items", async (req, res) => {
-    console.log(req.session.user_id);
+router.get("/home", async (req, res) => {
     try {
-        const items = await Item.find();
-        res.render("user/home", { message: res.locals.message });
+        const currentUser = await User.findOne({ _id: req.session.user_id });
+        // const items = await Item.find();
+        res.render("user/home", { currentUser });
     } catch (error) {
         res.status(404).json("failed");
     }
 });
 
-router.get("/items/seemore", (req, res) => {
-    res.render("user/itemDetails");
+router.get("/seemore", async (req, res) => {
+    const currentUser = await User.findOne({ _id: req.session.user_id });
+    res.render("user/itemDetails", { currentUser });
 });
 
-router.get("/items/cart", indexObj.isLoggedin, (req, res) => {
+router.get("/cart", indexObj.isLoggedin, (req, res) => {
     res.render("user/cart");
 });
 
