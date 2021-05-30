@@ -48,6 +48,8 @@ app.use((req, res, next) => {
 
 app.use(indexRoutes);
 app.use(userRoutes);
+app.use(vendorRoutes);
+app.use(adminRoutes);
 
 const PORT = process.env.PORT || 3000;
 

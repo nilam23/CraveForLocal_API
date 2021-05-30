@@ -8,9 +8,62 @@ const User = require("../models/userCollection");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-const isLoggedin = (req, res, next) => {
+const isUserLoggedin = async (req, res, next) => {
     if (req.session.user_id) {
-        return next();
+        try {
+            const user = await User.findOne({ _id: req.session.user_id });
+            if (user.userType == "user") {
+                return next();
+            } else {
+                req.session.message = {
+                    type: "warning",
+                    content: "You are not authorized to visit the page."
+                };
+                return res.redirect("/home");
+            }
+        } catch (err) {
+            console.log(`---USER-LOGGED-IN middleware error: ${err}.---`);
+        }
+    }
+    res.redirect("/signin");
+};
+
+const isVendorLoggedin = async (req, res, next) => {
+    if (req.session.user_id) {
+        try {
+            const user = await User.findOne({ _id: req.session.user_id });
+            if (user.userType == "vendor") {
+                return next();
+            } else {
+                req.session.message = {
+                    type: "warning",
+                    content: "You are not authorized to visit the page."
+                };
+                return res.redirect("/home");
+            }
+        } catch (err) {
+            console.log(`---VENDOR-LOGGED-IN middleware error: ${err}.---`);
+        }
+    }
+    res.redirect("/signin");
+};
+
+const isAdminLoggedin = async (req, res, next) => {
+    if (req.session.user_id) {
+        try {
+            const user = await User.findOne({ _id: req.session.user_id });
+            if (user.userType == "admin") {
+                return next();
+            } else {
+                req.session.message = {
+                    type: "warning",
+                    content: "You are not authorized to visit the page."
+                };
+                return res.redirect("/home");
+            }
+        } catch (err) {
+            console.log(`---ADMIN-LOGGED-IN middleware error: ${err}.---`);
+        }
     }
     res.redirect("/signin");
 };
@@ -56,7 +109,15 @@ router.post("/signup", async (req, res) => {
 });
 
 router.get("/signin", (req, res) => {
-    res.render("signinForm");
+    if (!req.session.user_id) {
+        res.render("signinForm");
+    } else {
+        req.session.message = {
+            type: "warning",
+            content: "You're already logged in."
+        };
+        res.redirect("/home");
+    }
 });
 
 router.post("/signin", async (req, res) => {
@@ -82,9 +143,17 @@ router.post("/signin", async (req, res) => {
                     };
                     res.redirect("/home");
                 } else if (userType == "admin") {
-                    res.send("Admin Page");
+                    req.session.message = {
+                        type: "success",
+                        content: `Welcome admin, CFL. Manage your dashboard here.`
+                    };
+                    res.redirect("/admin");
                 } else {
-                    res.send("Vendor Page");
+                    req.session.message = {
+                        type: "success",
+                        content: `Welcome. Manage your dashboard here.`
+                    };
+                    res.redirect("/vendor");
                 }
             } else {
                 req.session.message = {
@@ -126,7 +195,7 @@ router.post("/admin/vendors/new", async (req, res) => {
     }
 });
 
-router.post("/logout", (req, res) => {
+router.get("/logout", (req, res) => {
     req.session.user_id = null;
     res.redirect("/home");
 });
@@ -216,4 +285,6 @@ router.post("/resetpassword/:id/:token", async (req, res) => {
 });
 
 module.exports = router;
-module.exports.isLoggedin = isLoggedin;
+module.exports.isUserLoggedin = isUserLoggedin;
+module.exports.isVendorLoggedin = isVendorLoggedin;
+module.exports.isAdminLoggedin = isAdminLoggedin;

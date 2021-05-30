@@ -23,7 +23,7 @@ router.get("/seemore", async (req, res) => {
     res.render("user/itemDetails", { currentUser });
 });
 
-router.get("/cart", indexObj.isLoggedin, (req, res) => {
+router.get("/cart", indexObj.isUserLoggedin, (req, res) => {
     res.render("user/cart");
 });
 
