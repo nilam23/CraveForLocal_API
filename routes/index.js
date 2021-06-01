@@ -24,6 +24,7 @@ const isUserLoggedin = async (req, res, next) => {
                 return next();
             } else {
                 req.session.user_id = null;
+                redirectPath = '';
                 req.session.message = {
                     type: "warning",
                     content: "You are not authorized to visit the page."
@@ -51,6 +52,7 @@ const isVendorLoggedin = async (req, res, next) => {
                 return next();
             } else {
                 req.session.user_id = null;
+                redirectPath = '';
                 req.session.message = {
                     type: "warning",
                     content: "You are not authorized to visit the page."
@@ -78,6 +80,7 @@ const isAdminLoggedin = async (req, res, next) => {
                 return next();
             } else {
                 req.session.user_id = null;
+                redirectPath = '';
                 req.session.message = {
                     type: "warning",
                     content: "You are not authorized to visit the page."
@@ -157,6 +160,7 @@ router.post("/signup", async (req, res) => {
 // USER or ADMIN or VENDOR Sign in
 router.get("/signin", (req, res) => {
     if (!req.session.user_id) {
+        console.log(redirectPath);
         res.render("signinForm");
     } else {
         req.session.message = {
