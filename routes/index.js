@@ -160,7 +160,6 @@ router.post("/signup", async (req, res) => {
 // USER or ADMIN or VENDOR Sign in
 router.get("/signin", (req, res) => {
     if (!req.session.user_id) {
-        console.log(redirectPath);
         res.render("signinForm");
     } else {
         req.session.message = {
