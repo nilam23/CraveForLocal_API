@@ -1,0 +1,42 @@
+<%- include("../partials/header") %>
+    <%- include("../partials/heading") %>
+
+        <hr>
+        <% if(message){ %>
+            <div class="alert alert-<%=message.type%> alert-dismissible" role="alert" style="text-align: center;">
+                <strong>
+                    <%=message.content%>
+                </strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+            </div>
+            <% } %>
+
+                <% if(!categories) { %>
+                    <div id="shadow-box" class="confirmation">
+                        <h5><b>Team Crave For Local</b></h5>
+                        <hr>
+                        <p><i><b>You haven't added any product to our site yet.</b></i></p>
+                    </div>
+                    <div class="av-text-center">
+                        <a class="btn btn-primary btn-lg" href="/vendor">GO BACK</a>
+                    </div>
+                    <% }else{ %>
+                        <h2 class="portal"><small class="text-muted"><b>View your products by their
+                                    categories</b></small></h2>
+                        <div class="category">
+                            <div class="dropdown">
+                                <button class="dropbtn">Product categories</button>
+                                <div class="dropdown-content">
+                                    <% categories.forEach( category=> { %>
+                                        <a href="/vendor/products/<%= category %>">
+                                            <%= category %>
+                                        </a>
+                                        <% }) %>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                            <div class="av-text-center">
+                                <a class="btn btn-primary btn-lg" href="/vendor">GO BACK</a>
+                            </div>

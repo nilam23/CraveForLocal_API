@@ -2,15 +2,25 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 
-const Item = require("../models/itemCollection");
 const User = require("../models/userCollection");
+const Admin = require("../models/adminCollection");
+const Vendor = require("../models/vendorCollection");
+const Item = require("../models/itemCollection");
 const Order = require("../models/orderCollection");
 
 const indexObj = require("./index");
 
+
+// Landing Page
+router.get("/", (req, res) => {
+    res.render("landing");
+});
+
 router.get("/home", async (req, res) => {
     try {
-        const currentUser = await User.findOne({ _id: req.session.user_id });
+        const currentUser = await User.findOne({ _id: req.session.user_id }) ||
+            await Admin.findOne({ _id: req.session.user_id }) ||
+            await Vendor.findOne({ _id: req.session.user_id });
         // const items = await Item.find();
         res.render("user/home", { currentUser });
     } catch (error) {

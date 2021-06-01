@@ -14,6 +14,20 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    wishlist: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "Item",
+        }
+    ],
+    cart: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "Item",
+        }
+    ],
     userType: {
         type: String,
         required: true
