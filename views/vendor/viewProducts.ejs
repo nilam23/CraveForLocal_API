@@ -34,19 +34,26 @@
                                             <h4 id="product-price" class="text-center"><small class="text-muted">₹<%=
                                                         item.price %></small>
                                             </h4>
-                                            <h6 class="text-center"><small class="text-muted">Quantity: <b>
-                                                        <%= item.countInStock %>
-                                                    </b></small>
-                                            </h6>
-                                            <div id="outer">
-                                                <div class="inner"><a id="v-btn" class="btn btn-warning btn-sm"
-                                                        href="/vendor/products/<%= item._id %>/edit">Edit</a>
-                                                </div>
-                                                <form class="inner" action="/vendor/products/<%= item._id %>/delete"
-                                                    method="POST">
-                                                    <button id="v-btn" class="btn btn-danger btn-sm">Delete</button>
-                                                </form>
-                                            </div>
+                                            <% if(!item.countInStock){ %>
+                                                <h6 id="out-of-stock" class="text-center"><i>Out of stock</i></h6>
+                                                <% }else{ %>
+                                                    <h6 class="text-center"><small class="text-muted">Quantity: <b>
+                                                                <%= item.countInStock %>
+                                                            </b></small>
+                                                    </h6>
+                                                    <% } %>
+                                                        <div id="outer">
+                                                            <div class="inner"><a id="v-btn"
+                                                                    class="btn btn-warning btn-sm"
+                                                                    href="/vendor/products/<%= item._id %>/edit">Edit</a>
+                                                            </div>
+                                                            <form class="inner"
+                                                                action="/vendor/products/<%= item._id %>/delete"
+                                                                method="POST">
+                                                                <button id="v-btn"
+                                                                    class="btn btn-danger btn-sm">Delete</button>
+                                                            </form>
+                                                        </div>
                                         </div>
                                     </div>
                                     <% }) %>

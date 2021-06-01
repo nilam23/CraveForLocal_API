@@ -12,14 +12,11 @@
             </div>
             <% } %>
 
-                <% if(!categories) { %>
+                <% if(!categories.length) { %>
                     <div id="shadow-box" class="confirmation">
                         <h5><b>Team Crave For Local</b></h5>
                         <hr>
-                        <p><i><b>You haven't added any product to our site yet.</b></i></p>
-                    </div>
-                    <div class="av-text-center">
-                        <a class="btn btn-primary btn-lg" href="/vendor">GO BACK</a>
+                        <p><i>You haven't added any product to our site yet.</i></p>
                     </div>
                     <% }else{ %>
                         <h2 class="portal"><small class="text-muted"><b>View your products by their

@@ -65,6 +65,11 @@
     padding-top: 8px;
 }
 
+#out-of-stock{
+    color: rgb(87, 185, 57);
+    font-size: 17px;
+}
+
 @media (max-width: 400px){
     #product-name{
         font-size: medium;

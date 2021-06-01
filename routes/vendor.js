@@ -4,8 +4,10 @@ const fs = require("fs");
 const multer = require("multer");
 const path = require("path");
 
+// const User = require("../models/userCollection");
+// const Admin = require("../models/adminCollection");
+const Vendor = require("../models/vendorCollection");
 const Item = require("../models/itemCollection");
-const User = require("../models/userCollection");
 const Order = require("../models/orderCollection");
 
 const indexObj = require("./index");
@@ -36,7 +38,7 @@ router.get("/vendor/addproduct", indexObj.isVendorLoggedin, (req, res) => {
 router.post("/vendor/addproduct", indexObj.isVendorLoggedin, upload.single('image'), async (req, res, next) => {
     try {
         const dirname = __dirname.replace('routes', '');
-        const vendor = await User.findOne({ _id: req.session.user_id });
+        const vendor = await Vendor.findOne({ _id: req.session.user_id });
         const newItem = new Item({
             title: req.body.title,
             description: req.body.description,
@@ -68,9 +70,8 @@ router.get("/vendor/products", indexObj.isVendorLoggedin, async (req, res) => {
         var items = await Item.find();
         var categories = [];
         items.forEach(item => {
-            if (item.vendorID == req.session.user_id) {
+            if (item.vendorID == req.session.user_id)
                 categories.push(item.category);
-            }
         });
         categories = [...new Set(categories)];
         res.render("vendor/productCategories", { categories });
@@ -84,7 +85,11 @@ router.get("/vendor/products", indexObj.isVendorLoggedin, async (req, res) => {
 router.get("/vendor/products/:category", indexObj.isVendorLoggedin, async (req, res) => {
     try {
         const { category } = req.params;
-        const items = await Item.find({ category });
+        var items = await Item.find({ category });
+        items = items.filter(item => {
+            if (item.vendorID == req.session.user_id)
+                return item;
+        });
         res.render("vendor/viewProducts", { items });
     } catch (err) {
         console.log(`---VENDOR/PRODUCT DISPLAYING ERROR: ${err}.---`);
