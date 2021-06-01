@@ -23,7 +23,6 @@ const isUserLoggedin = async (req, res, next) => {
             if (user) {
                 return next();
             } else {
-                req.session.user_id = null;
                 redirectPath = '';
                 req.session.message = {
                     type: "warning",
@@ -51,7 +50,6 @@ const isVendorLoggedin = async (req, res, next) => {
             if (vendor) {
                 return next();
             } else {
-                req.session.user_id = null;
                 redirectPath = '';
                 req.session.message = {
                     type: "warning",
@@ -79,7 +77,6 @@ const isAdminLoggedin = async (req, res, next) => {
             if (admin) {
                 return next();
             } else {
-                req.session.user_id = null;
                 redirectPath = '';
                 req.session.message = {
                     type: "warning",
