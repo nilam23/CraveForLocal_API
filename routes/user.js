@@ -12,19 +12,23 @@ const indexObj = require("./index");
 
 
 // Landing Page
-router.get("/", (req, res) => {
+router.get("", (req, res) => {
     res.render("landing");
 });
 
 router.get("/home", async (req, res) => {
     try {
+        res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
+        if (indexObj.deletePath)
+            indexObj.deletePath();
         const currentUser = await User.findOne({ _id: req.session.user_id }) ||
             await Admin.findOne({ _id: req.session.user_id }) ||
             await Vendor.findOne({ _id: req.session.user_id });
         // const items = await Item.find();
         res.render("user/home", { currentUser });
     } catch (error) {
-        res.status(404).json("failed");
+        // res.status(404).json("failed");
+        console.log(error)
     }
 });
 

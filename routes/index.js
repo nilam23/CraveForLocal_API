@@ -14,6 +14,10 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 //  Middlewares: isLoggedin
 var redirectPath = '';
+var isSet = false;
+var deletePath = () => {
+    redirectPath = '';
+}
 
 const isUserLoggedin = async (req, res, next) => {
     redirectPath = req.path;
@@ -175,6 +179,8 @@ router.post("/signup", async (req, res) => {
 // USER or ADMIN or VENDOR Sign in
 router.get("/signin", (req, res) => {
     if (!req.session.user_id) {
+        module.exports.deletePath = deletePath;
+        isSet = true;
         res.render("signinForm");
     } else {
         req.session.message = {
@@ -196,20 +202,45 @@ router.post("/signin", async (req, res) => {
                 type: "danger",
                 content: "Incorrect email or password."
             };
+            // redirectPath = '';
             res.redirect("/signin");
         } else {
             var userType;
             var userPassword;
             var userId;
             if (user) {
+                if (redirectPath.split('/')[1] == 'admin' || redirectPath.split('/')[1] == 'vendor') {
+                    req.session.message = {
+                        type: 'warning',
+                        content: 'You are not authorized to visit the page.'
+                    };
+                    redirectPath = '';
+                    return res.redirect('/home');
+                }
                 userType = user.userType;
                 userPassword = user.password;
                 userId = user._id;
             } else if (admin) {
+                if (redirectPath.split('/')[1] == 'cart' || redirectPath.split('/')[1] == 'wishlist' || redirectPath.split('/')[1] == 'vendor') {
+                    req.session.message = {
+                        type: 'warning',
+                        content: 'You are not authorized to visit the page.'
+                    };
+                    redirectPath = '';
+                    return res.redirect('/home');
+                }
                 userType = admin.userType;
                 userPassword = admin.password;
                 userId = admin._id;
             } else {
+                if (redirectPath.split('/')[1] == 'cart' || redirectPath.split('/')[1] == 'wishlist' || redirectPath.split('/')[1] == 'admin') {
+                    req.session.message = {
+                        type: 'warning',
+                        content: 'You are not authorized to visit the page.'
+                    };
+                    redirectPath = '';
+                    return res.redirect('/home');
+                }
                 userType = vendor.userType;
                 userPassword = vendor.password;
                 userId = vendor._id;
@@ -269,6 +300,7 @@ router.post("/signin", async (req, res) => {
                     type: "danger",
                     content: "Incorrect email or password."
                 };
+                // redirectPath = '';
                 res.redirect("/signin");
             }
         }
@@ -473,3 +505,5 @@ module.exports = router;
 module.exports.isUserLoggedin = isUserLoggedin;
 module.exports.isVendorLoggedin = isVendorLoggedin;
 module.exports.isAdminLoggedin = isAdminLoggedin;
+if (isSet == false)
+    module.exports.deletePath = null;
