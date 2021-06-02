@@ -101,7 +101,11 @@ router.get("/vendor/products/:category", indexObj.isVendorLoggedin, async (req, 
 router.get("/vendor/products/:id/edit", indexObj.isVendorLoggedin, async (req, res) => {
     try {
         const item = await Item.findById(req.params.id);
-        res.render("vendor/editProduct", { item });
+        if (item.vendorID == req.session.user_id) {
+            res.render("vendor/editProduct", { item });
+        } else {
+            res.render("accessDeny");
+        }
     } catch (err) {
         console.log(`---VENDOR/PRODUCT EDIT FORM ERROR: ${err}.---`);
         res.redirect("/vendor");
@@ -110,43 +114,50 @@ router.get("/vendor/products/:id/edit", indexObj.isVendorLoggedin, async (req, r
 
 router.post("/vendor/products/:id/edit", indexObj.isVendorLoggedin, upload.single('image'), async (req, res) => {
     try {
-        const dirname = __dirname.replace('routes', '');
         const item = await Item.findById(req.params.id);
-        item.title = req.body.title;
-        item.description = req.body.description;
-        item.category = req.body.category;
-        item.price = req.body.price;
-        item.countInStock = req.body.quantity;
-        if (req.file) {
-            item.image = {
-                data: fs.readFileSync(path.join(dirname + '/uploads/' + req.file.filename)),
-                contentType: 'image/png'
+        if (item.vendorID == req.session.user_id) {
+            const dirname = __dirname.replace('routes', '');
+            item.title = req.body.title;
+            item.description = req.body.description;
+            item.category = req.body.category;
+            item.price = req.body.price;
+            item.countInStock = req.body.quantity;
+            if (req.file) {
+                item.image = {
+                    data: fs.readFileSync(path.join(dirname + '/uploads/' + req.file.filename)),
+                    contentType: 'image/png'
+                }
             }
+            await item.save();
+            req.session.message = {
+                type: 'success',
+                content: 'Your item has been updated successfully.'
+            }
+            res.redirect(`/vendor/products/${item.category}`);
+        } else {
+            res.render("accessDeny");
         }
-        await item.save();
-        req.session.message = {
-            type: 'success',
-            content: 'Your item has been updated successfully.'
-        }
-        res.redirect(`/vendor/products/${item.category}`);
     } catch (err) {
         console.log(`---VENDOR/PRODUCT UPDATING ERROR: ${err}.---`);
         res.redirect("/vendor");
     }
-
 });
 
 // Deleting a particular product
 router.post("/vendor/products/:id/delete", indexObj.isVendorLoggedin, async (req, res) => {
     try {
-        const product = await Item.findById(req.params.id);
-        const category = product.category;
-        await product.remove();
-        req.session.message = {
-            type: "success",
-            content: "Item removed successfully."
+        const item = await Item.findById(req.params.id);
+        if (item.vendorID == req.session.user_id) {
+            const category = item.category;
+            await item.remove();
+            req.session.message = {
+                type: "success",
+                content: "Item removed successfully."
+            }
+            res.redirect(`/vendor/products/${category}`);
+        } else {
+            res.render("accessDeny");
         }
-        res.redirect(`/vendor/products/${category}`);
     } catch (err) {
         console.log(`---VENDOR/PRODUCT DELETING ERROR: ${err}.---`);
         res.redirect("/vendor");
