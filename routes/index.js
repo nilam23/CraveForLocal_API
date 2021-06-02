@@ -96,6 +96,24 @@ const isAdminLoggedin = async (req, res, next) => {
     res.redirect("/signin");
 };
 
+// Middleware: isLoggedout
+const isLoggedout = async (req, res, next) => {
+    if (!req.session.user_id) {
+        return next();
+    }
+    req.session.message = {
+        type: 'warning',
+        content: 'You are already logged in.'
+    };
+    if (await User.findById(req.session.user_id)) {
+        res.redirect('/home');
+    } else if (await Admin.findById(req.session.user_id)) {
+        res.redirect('/admin');
+    } else {
+        res.redirect('/vendor');
+    }
+};
+
 // Admin registration
 const createAdmin = async () => {
     try {
@@ -261,11 +279,11 @@ router.post("/signin", async (req, res) => {
 });
 
 // Creating a new vendor by admin
-router.get("/admin/vendors/new", isAdminLoggedin, (req, res) => {
+router.get("/admin/addvendor", isAdminLoggedin, (req, res) => {
     res.render("admin/addVendor");
 });
 
-router.post("/admin/vendors/new", isAdminLoggedin, async (req, res) => {
+router.post("/admin/addvendor", isAdminLoggedin, async (req, res) => {
     try {
         const { name, email, password } = req.body;
         const vendor = await Vendor.findOne({ email });
@@ -308,11 +326,11 @@ router.get("/logout", (req, res) => {
 });
 
 // managing forgot password
-router.get("/forgotpassword", (req, res) => {
+router.get("/forgotpassword", isLoggedout, (req, res) => {
     res.render("forgotPasswordForm");
 });
 
-router.post("/forgotpassword", async (req, res) => {
+router.post("/forgotpassword", isLoggedout, async (req, res) => {
     try {
         const email = req.body.email;
         const user = await User.findOne({ email });
@@ -354,7 +372,15 @@ router.post("/forgotpassword", async (req, res) => {
                 subject: 'Crave For Local: Email verification link for password reset.',
                 text: `To reset your email, please click on the this link: ${link}`
             };
-            // mailScript.transporter.sendMail(mailOptions, (err, info) => console.log(`---EMAIL ERROR: ${err}.---`));
+            // mailScript.transporter.sendMail(mailOptions, (err, info) => {
+            //     if (err) {
+            //         req.session.message = {
+            //             type: 'danger',
+            //             content: 'Email could not be sent.'
+            //         };
+            //         return res.redirect("/forgotpassword");
+            //     }
+            // });
             console.log(link);
             res.render("emailConfirmation");
         }
@@ -365,7 +391,7 @@ router.post("/forgotpassword", async (req, res) => {
     }
 });
 
-router.get("/resetpassword/:id/:token", async (req, res) => {
+router.get("/resetpassword/:id/:token", isLoggedout, async (req, res) => {
     const { id, token } = req.params;
     const user = await User.findOne({ _id: id });
     const admin = await Admin.findOne({ _id: id });
@@ -392,7 +418,7 @@ router.get("/resetpassword/:id/:token", async (req, res) => {
     }
 });
 
-router.post("/resetpassword/:id/:token", async (req, res) => {
+router.post("/resetpassword/:id/:token", isLoggedout, async (req, res) => {
     const { id, token } = req.params;
     const { password, confirmedPassword } = req.body;
     const user = await User.findOne({ _id: id });
