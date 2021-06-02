@@ -8,25 +8,26 @@
         </div>
         <hr>
         <div class="signup-form">
-            <form action="/admin/addvendor" method="POST">
-                <h2>Add New Vedor</h2>
+            <form action="/admin/vendors/<%= vendor._id %>/remove" method="POST">
+                <h2>Inform vendor</h2>
                 <hr>
                 <div class="form-group">
-                    <input type="text" class="form-control" name="name" placeholder="Vendor's name" required="required">
-                </div>
-                <div class="form-group">
-                    <input type="email" class="form-control" name="email" placeholder="Vendor's email"
+                    <label for="email">Email address</label>
+                    <input type="text" class="form-control" name="email" value="<%= vendor.email %>"
                         required="required">
                 </div>
                 <div class="form-group">
-                    <input type="password" class="form-control" name="password" placeholder="Password for vendor"
+                    <input type="text" class="form-control" name="subject" placeholder="Specify subject"
                         required="required">
                 </div>
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary btn-block btn-lg">Add Vendor</button>
+                    <textarea class="form-control" name="content" placeholder="Write your message" required></textarea>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">Confirm deletion</button>
                 </div>
             </form>
         </div>
         <div class="av-text-center">
-            <a class="btn btn-primary btn-lg" href="/admin">GO BACK</a>
+            <a class="btn btn-primary btn-lg" href="/admin/vendors">GO BACK</a>
         </div>

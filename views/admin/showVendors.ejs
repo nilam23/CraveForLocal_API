@@ -1,0 +1,77 @@
+<%- include("../partials/header") %>
+    <%- include("../partials/heading") %>
+
+        <hr>
+        <% if(message){ %>
+            <div class="alert alert-<%=message.type%> alert-dismissible" role="alert" style="text-align: center;">
+                <strong>
+                    <%=message.content%>
+                </strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+            </div>
+            <% } %>
+
+                <h1 class="portal"><small class="text-muted"><b>ADMIN PORTAL</b></small></h1>
+                <div class="av-text-center">
+                    <a class="btn btn-danger btn-lg" href="/logout">LOG OUT</a>
+                </div>
+                <hr>
+                <h2 class="portal"><small class="text-muted"><b>Vendor Details</b></small></h2>
+                <div class="container">
+                    <div class="row">
+                        <% vendorDetails.forEach( details=> { %>
+                            <div id="card-container" class="col-lg-6 col-md-6 col-sm-12 col-12">
+                                <div id="shadow-box" class="card-content">
+                                    <div style="display: flex; justify-content: center; align-items: center;">
+                                        <div style=" text-align: center;">
+                                            <h5 class="text-center"><small class="text-muted">Contact
+                                                    information</small>
+                                            </h5>
+                                            <hr>
+                                        </div>
+                                    </div>
+                                    <h5 class="text-center"><small class="text-muted">Name: <b>
+                                                <%=details.name %>
+                                            </b></small>
+                                    </h5>
+                                    <h5 class="text-center"><small class="text-muted">Email: <b>
+                                                <%=details.email %>
+                                            </b></small>
+                                    </h5>
+                                    <hr>
+                                    <% if(!details.categories.length){ %>
+                                        <h5 class="text-center"><small class="text-muted"><b
+                                                    style="color: indianred;"><i>No item added
+                                                        yet.</i></b></small>
+                                        </h5>
+                                        <% }else { %>
+                                            <h5 class="text-center"><small class="text-muted">Total items added: <b>
+                                                        <%=details.totalItems %>
+                                                    </b></small>
+                                            </h5>
+                                            <h5 class="text-center"><small class="text-muted">Item categories:
+                                                    <b>
+                                                        <%= details.categories %>
+                                                    </b>
+                                                </small>
+                                            </h5>
+                                            <% } %>
+                                                <div id="outer">
+                                                    <div class="inner"><a id="v-btn" class="btn btn-info btn-sm"
+                                                            href="/admin/vendors/<%= details.id %>/contact">Contact</a>
+                                                    </div>
+                                                    <div class="inner"><a id="v-btn" class="btn btn-danger btn-sm"
+                                                            href="/admin/vendors/<%= details.id %>/remove">Remove</a>
+                                                    </div>
+                                                </div>
+                                </div>
+                            </div>
+                            <% }) %>
+                    </div>
+                </div>
+                <hr>
+                <br>
+                <div class="av-text-center">
+                    <a class="btn btn-primary btn-lg" href="/admin">GO BACK</a>
+                </div>
