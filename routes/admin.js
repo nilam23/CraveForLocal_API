@@ -44,7 +44,7 @@ router.get("/admin/vendors", indexObj.isAdminLoggedin, async (req, res) => {
 });
 
 // ADMIN: Contact vendor
-router.get("/admin/vendors/:id/contact", async (req, res) => {
+router.get("/admin/vendors/:id/contact", indexObj.isAdminLoggedin, async (req, res) => {
     try {
         const vendor = await Vendor.findById(req.params.id);
         res.render("admin/contactVendor", { vendor });
@@ -84,7 +84,7 @@ router.post("/admin/vendors/:id/contact", async (req, res) => {
 });
 
 // ADMIN: Deleting a vendor
-router.get("/admin/vendors/:id/remove", async (req, res) => {
+router.get("/admin/vendors/:id/remove", indexObj.isAdminLoggedin, async (req, res) => {
     try {
         const vendor = await Vendor.findById(req.params.id);
         res.render("admin/deleteVendor", { vendor });
@@ -94,7 +94,9 @@ router.get("/admin/vendors/:id/remove", async (req, res) => {
     }
 });
 
-router.post("/admin/vendors/:id/remove", async (req, res) => {
+
+//To be modified
+router.post("/admin/vendors/:id/remove", indexObj.isAdminLoggedin, async (req, res) => {
     try {
         const vendor = await Vendor.findById(req.params.id);
         const mailOptions = {
