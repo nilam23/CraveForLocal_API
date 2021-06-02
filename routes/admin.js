@@ -94,11 +94,15 @@ router.get("/admin/vendors/:id/remove", indexObj.isAdminLoggedin, async (req, re
     }
 });
 
-
-//To be modified
 router.post("/admin/vendors/:id/remove", indexObj.isAdminLoggedin, async (req, res) => {
     try {
         const vendor = await Vendor.findById(req.params.id);
+        const items = await Item.find();
+        items.forEach(async (item) => {
+            if (item.vendorID.equals(vendor._id))
+                await item.remove();
+        });
+        await vendor.remove();
         const mailOptions = {
             from: `${process.env.ADMIN_NAME} <${process.env.ADMIN_EMAIL}>`,
             to: `${req.body.email}`,
@@ -114,7 +118,6 @@ router.post("/admin/vendors/:id/remove", indexObj.isAdminLoggedin, async (req, r
                 return res.redirect("/admin/vendors");
             }
         });
-        await vendor.remove();
         req.session.message = {
             type: 'success',
             content: 'The vendor has been removed.'
