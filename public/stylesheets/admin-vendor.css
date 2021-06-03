@@ -90,8 +90,22 @@
     display: inline-block;
 }
 
+.inner1{
+    float: left;
+    margin-right: 4px;
+    margin-bottom: 3px;
+}
+
 @media (max-width: 370px){
     #v-btn{
         font-size: small;
+    }
+}
+
+@media (max-width: 767px){
+    #outer1{
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 }

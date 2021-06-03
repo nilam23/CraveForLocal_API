@@ -10,6 +10,7 @@ const Order = require("../models/orderCollection");
 
 const indexObj = require("./index");
 const mailScript = require("../mailScript");
+const { request } = require("express");
 
 // Admin dashboard
 router.get("/admin", indexObj.isAdminLoggedin, (req, res) => {
@@ -29,10 +30,13 @@ router.get("/admin/vendors", indexObj.isAdminLoggedin, async (req, res) => {
             details.email = vendor.email;
             details.totalItems = 0;
             details.categories = [];
+            details.reqCount = 0;
             items.forEach(item => {
-                if (item.vendorID.equals(vendor._id)) {
+                if (item.vendorID.equals(vendor._id) && item.status == 'granted') {
                     details.totalItems++;
                     details.categories.push(item.category);
+                } else if (item.vendorID.equals(vendor._id) && item.status == 'pending') {
+                    details.reqCount++;
                 }
             });
             details.categories = [...new Set(details.categories)];
@@ -40,6 +44,8 @@ router.get("/admin/vendors", indexObj.isAdminLoggedin, async (req, res) => {
         });
         res.render("admin/showVendors", { vendorDetails });
     } catch (err) {
+        console.log(`---ADMIN/ Show vendor error: ${err}.---`);
+        res.redirect("/admin");
     }
 });
 
@@ -125,6 +131,66 @@ router.post("/admin/vendors/:id/remove", indexObj.isAdminLoggedin, async (req, r
         res.redirect("/admin/vendors");
     } catch (err) {
         console.log(`---ADMIN/ Delete vendor error 2: ${err}.---`);
+        res.redirect("/admin/vendors");
+    }
+});
+
+// ADMIN: handling product requests of vendors
+router.get("/admin/vendors/requests", indexObj.isAdminLoggedin, async (req, res) => {
+    try {
+        var items = await Item.find({ status: 'pending' });
+        var vendors = await Vendor.find();
+        var productGrantReqs = [];
+        items.forEach(item => {
+            vendors.forEach(vendor => {
+                if (item.vendorID.equals(vendor._id)) {
+                    var product = {};
+                    product.id = item._id;
+                    product.title = item.title;
+                    product.description = item.description;
+                    product.category = item.category;
+                    product.price = item.price;
+                    product.countInStock = item.countInStock;
+                    product.image = item.image;
+                    product.vendorName = vendor.name;
+                    productGrantReqs.push(product);
+                }
+            });
+        });
+        res.render("admin/vendorProductRequests", { productGrantReqs });
+    } catch (err) {
+        console.log(`---ADMIN/ Handling product request error: ${err}.---`);
+        res.redirect("/admin/vendors");
+    }
+});
+
+router.post("/admin/vendors/requests/:id/deny", indexObj.isAdminLoggedin, async (req, res) => {
+    try {
+        const item = await Item.findById(req.params.id);
+        await item.remove();
+        req.session.message = {
+            type: 'success',
+            content: 'Request has been denied.'
+        };
+        res.redirect("/admin/vendors/requests");
+    } catch (err) {
+        console.log(`---ADMIN/ Denying product request error: ${err}.---`);
+        res.redirect("/admin/vendors");
+    }
+});
+
+router.post("/admin/vendors/requests/:id/grant", indexObj.isAdminLoggedin, async (req, res) => {
+    try {
+        const item = await Item.findById(req.params.id);
+        item.status = 'granted';
+        await item.save();
+        req.session.message = {
+            type: 'success',
+            content: 'Request has been granted.'
+        };
+        res.redirect("/admin/vendors/requests");
+    } catch (err) {
+        console.log(`---ADMIN/ Granting product request error: ${err}.---`);
         res.redirect("/admin/vendors");
     }
 });

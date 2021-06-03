@@ -1,0 +1,72 @@
+<%- include("../partials/header") %>
+    <%- include("../partials/heading") %>
+
+
+        <hr>
+        <% if(message){ %>
+            <div class="alert alert-<%=message.type%> alert-dismissible" role="alert" style="text-align: center;">
+                <strong>
+                    <%=message.content%>
+                </strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+            </div>
+            <% } %>
+
+                <h2 class="portal"><small class="text-muted"><b>Vendors' products</b></small></h2>
+
+                <% if(!productGrantReqs.length){ %>
+                    <h5 class="text-center"><small class="text-muted"><b style="color: indianred;"><i>No vendor has
+                                    added anything recently.</i></b></small>
+                    </h5>
+                    <% }else{ %>
+                        <div class="container">
+                            <div id="shadow-box" class="details-container">
+                                <% productGrantReqs.forEach( product=> { %>
+                                    <div class="row">
+                                        <div class="col-lg-4 col-md-6 col-sm-12">
+                                            <div class="details-img">
+                                                <img id="shadow-box" class="product-img" src="data:image/<%=product.image.contentType%>;base64,
+                        <%=product.image.data.toString('base64')%>" alt="<%= product.title %>">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-8 col-md-6 col-sm-12">
+                                            <div class="details-info">
+                                                <h4><small class="text-muted"><b>
+                                                            <%= product.title %>
+                                                        </b> (<%= product.category %>)</small></h4>
+                                                <h4><small class="text-muted"><i>
+                                                            <%= product.description %>
+                                                        </i></small></h4>
+                                                <h5><small class="text-muted">₹ <%= product.price %></small></h5>
+                                                <h5><small class="text-muted">Quantity: <%= product.countInStock %>
+                                                    </small></h5>
+                                                <h5><small class="text-muted">Added by: <b>
+                                                            <%= product.vendorName %>
+                                                        </b></small></h5>
+                                                <div id="outer1">
+                                                    <form class="inner1"
+                                                        action="/admin/vendors/requests/<%=product.id%>/deny"
+                                                        method="POST">
+                                                        <button class="btn btn-danger btn-sm">Deny</button>
+                                                    </form>
+                                                    <form class="inner1"
+                                                        action="/admin/vendors/requests/<%=product.id%>/grant"
+                                                        method="POST">
+                                                        <button class="btn btn-success btn-sm">Grant</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <% }) %>
+                            </div>
+                        </div>
+                        <% } %>
+
+                            <hr>
+                            <br>
+                            <div class="av-text-center">
+                                <a class="btn btn-primary btn-lg" href="/admin">GO BACK</a>
+                            </div>

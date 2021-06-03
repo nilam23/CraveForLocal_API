@@ -54,7 +54,7 @@ router.post("/vendor/addproduct", indexObj.isVendorLoggedin, upload.single('imag
         await newItem.save();
         req.session.message = {
             type: 'success',
-            content: 'Product added successfully.'
+            content: 'Added. Admin will shortly verify your product.'
         }
         res.redirect("/vendor");
     } catch (err) {
@@ -70,7 +70,7 @@ router.get("/vendor/products", indexObj.isVendorLoggedin, async (req, res) => {
         var items = await Item.find();
         var categories = [];
         items.forEach(item => {
-            if (item.vendorID == req.session.user_id)
+            if ((item.vendorID == req.session.user_id) && item.status == 'granted')
                 categories.push(item.category);
         });
         categories = [...new Set(categories)];
@@ -87,7 +87,7 @@ router.get("/vendor/products/:category", indexObj.isVendorLoggedin, async (req, 
         const { category } = req.params;
         var items = await Item.find({ category });
         items = items.filter(item => {
-            if (item.vendorID == req.session.user_id)
+            if ((item.vendorID == req.session.user_id) && item.status == 'granted')
                 return item;
         });
         res.render("vendor/viewProducts", { items });
@@ -101,7 +101,7 @@ router.get("/vendor/products/:category", indexObj.isVendorLoggedin, async (req, 
 router.get("/vendor/products/:id/edit", indexObj.isVendorLoggedin, async (req, res) => {
     try {
         const item = await Item.findById(req.params.id);
-        if (item.vendorID == req.session.user_id) {
+        if ((item.vendorID == req.session.user_id) && item.status == 'granted') {
             res.render("vendor/editProduct", { item });
         } else {
             res.render("accessDeny");
@@ -115,7 +115,7 @@ router.get("/vendor/products/:id/edit", indexObj.isVendorLoggedin, async (req, r
 router.post("/vendor/products/:id/edit", indexObj.isVendorLoggedin, upload.single('image'), async (req, res) => {
     try {
         const item = await Item.findById(req.params.id);
-        if (item.vendorID == req.session.user_id) {
+        if ((item.vendorID == req.session.user_id) && item.status == 'granted') {
             const dirname = __dirname.replace('routes', '');
             item.title = req.body.title;
             item.description = req.body.description;
@@ -147,7 +147,7 @@ router.post("/vendor/products/:id/edit", indexObj.isVendorLoggedin, upload.singl
 router.post("/vendor/products/:id/delete", indexObj.isVendorLoggedin, async (req, res) => {
     try {
         const item = await Item.findById(req.params.id);
-        if (item.vendorID == req.session.user_id) {
+        if ((item.vendorID == req.session.user_id) && item.status == 'granted') {
             const category = item.category;
             await item.remove();
             req.session.message = {
