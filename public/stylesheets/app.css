@@ -110,7 +110,11 @@ body {
 }
 
 #item-name{
-    padding-top: 8px;
+    padding-top: 5px;
+}
+
+#card-item-name{
+
 }
 
 @media (min-width: 1200px){
@@ -140,10 +144,16 @@ body {
     }
 }
 
+@media (max-width: 500px){
+    #card-item-name{
+        font-size: medium;
+    }
+}
+
 /* ITEM DETAILS */
 
 .details-container{
-    margin: 10px;
+    margin: 30px 10px 50px 10px;
 }
 
 .product-img{

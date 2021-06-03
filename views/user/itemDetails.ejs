@@ -2,29 +2,46 @@
     <%- include("../partials/heading") %>
         <%- include("../partials/navbar") %>
 
-            <div class="container">
-                <div id="shadow-box" class="details-container">
-                    <div class="row">
-                        <div class="col-lg-4 col-md-6 col-sm-12">
-                            <div class="details-img">
-                                <img class="product-img" id="shadow-box" src="../images/images.jpg" alt="demo">
-                            </div>
-                        </div>
-                        <div class="col-lg-8 col-md-6 col-sm-12">
-                            <div class="details-info">
-                                <h3><small class="text-muted"><b>Demo item</b></small></h3>
-                                <h4><small class="text-muted"><i>Lorem Ipsum is simply dummy text of the printing and
-                                            typesetting
-                                            industry.</i></small></h4>
-                                <h3><small class="text-muted">₹ 399</small></h3>
-                                <div>
-                                    <a class="btn btn-info btn-sm" href="#">Quantity</a>
-                                    <a class="btn btn-info btn-sm" href="#">Add to cart</a>
+
+            <% if(message){ %>
+                <div class="alert alert-<%=message.type%> alert-dismissible" role="alert" style="text-align: center;">
+                    <strong>
+                        <%=message.content%>
+                    </strong>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                </div>
+                <% } %>
+
+                    <div class="container">
+                        <div id="shadow-box" class="details-container">
+                            <div class="row">
+                                <div class="col-lg-4 col-md-6 col-sm-12">
+                                    <div class="details-img">
+                                        <img class="product-img" id="shadow-box" src="data:image/<%=item.image.contentType%>;base64,
+                                <%=item.image.data.toString('base64')%>" alt="<%= item.title %>">
+                                    </div>
+                                </div>
+                                <div class="col-lg-8 col-md-6 col-sm-12">
+                                    <div class="details-info">
+                                        <h3><small class="text-muted"><b>
+                                                    <%= item.title %>
+                                                </b></small></h3>
+                                        <h4><small class="text-muted"><i>
+                                                    <%= item.description %>
+                                                </i></small></h4>
+                                        <h3><small class="text-muted">₹ <%= item.price %></small></h3>
+                                        <a class="btn btn-primary btn-sm" href="/<%= item._id %>/addtowishlist">Add to
+                                            wishlist</a>
+                                        <a class="btn btn-warning btn-sm" href="/<%= item._id %>/addtocart">Add to
+                                            cart</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                    <div class="text-center">
+                        <a class="btn btn-primary btn-lg" href="/home">GO BACK</a>
+                    </div>
 
-            <%- include("../partials/footer") %>
+                    <%- include("../partials/footer") %>
