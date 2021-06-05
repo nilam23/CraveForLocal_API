@@ -12,6 +12,11 @@
 	padding-bottom: 20px;
 }
 
+@media (max-width: 450px){
+    .portal{
+        font-size: x-large;
+    }
+}
 
 /* VENDOR: Product Categories */
 .category{
@@ -88,6 +93,12 @@
 .inner
 {
     display: inline-block;
+}
+
+@media (max-width: 473px){
+    .inner{
+        margin-top: 3px;
+    }
 }
 
 .inner1{

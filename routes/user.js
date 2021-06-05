@@ -21,11 +21,15 @@ router.get("/home", async (req, res) => {
         res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
         if (indexObj.deletePath)
             indexObj.deletePath();
-        const currentUser = await User.findOne({ _id: req.session.user_id }) ||
-            await Admin.findOne({ _id: req.session.user_id }) ||
-            await Vendor.findOne({ _id: req.session.user_id });
+        const currentUser = await User.findOne({ _id: req.session.user_id });
         const items = await Item.find({ status: 'granted' });
-        res.render("user/home", { currentUser, items });
+        var totalCartItems = 0;
+        if (currentUser) {
+            currentUser.cart.forEach(item => {
+                totalCartItems += item.totalQuantity;
+            });
+        }
+        res.render("user/home", { currentUser, items, totalCartItems });
     } catch (error) {
         console.log(`USER: Home page error: ${error}`);
         res.redirect("/");
@@ -36,12 +40,16 @@ router.get("/home", async (req, res) => {
 router.get("/:id/seemore", async (req, res) => {
     try {
         const currentUser = await User.findOne({ _id: req.session.user_id });
-        // currentUser.cart = [];
-        // await currentUser.save()
         const item = await Item.findById(req.params.id);
         if (item.status == 'pending')
             return res.render("accessDeny");
-        res.render("user/itemDetails", { currentUser, item });
+        var totalCartItems = 0;
+        if (currentUser) {
+            currentUser.cart.forEach(item => {
+                totalCartItems += item.totalQuantity;
+            });
+        }
+        res.render("user/itemDetails", { currentUser, item, totalCartItems });
     } catch (error) {
         console.log(`USER: Item details error: ${error}`);
         res.redirect("/home");
@@ -49,32 +57,39 @@ router.get("/:id/seemore", async (req, res) => {
 });
 
 // Add to cart handle
-router.get("/:id/addtocart", indexObj.isUserLoggedin, async (req, res) => {
+router.post("/:id/addtocart", indexObj.isUserLoggedin, async (req, res) => {
     try {
         const item = await Item.findById(req.params.id);
         if (item.status == 'pending')
             return res.render('accessDeny');
         const user = await User.findById(req.session.user_id);
-        var isAddedtoCart = false;
-        user.cart.forEach(itemID => {
-            if (itemID.equals(item._id)) {
-                req.session.message = {
-                    type: 'warning',
-                    content: 'Item is already added to your cart.'
-                };
-                isAddedtoCart = true;
+        var isAlreadyAdded = false;
+        var totalQuantity;
+        if (req.body.quantity == '')
+            totalQuantity = 1;
+        else
+            totalQuantity = Number(req.body.quantity);
+        user.cart.forEach(cartItem => {
+            if (cartItem.itemID.equals(item._id)) {
+                cartItem.totalQuantity += totalQuantity;
+                cartItem.totalPrice += totalQuantity * Number(item.price);
+                isAlreadyAdded = true;
             }
         });
-        if (!isAddedtoCart) {
-            user.cart.push(item._id);
-            await user.save();
-            req.session.message = {
-                type: 'success',
-                content: 'Item added to your cart.'
+        if (!isAlreadyAdded) {
+            var cartItem = {
+                itemID: item._id,
+                totalQuantity,
+                totalPrice: totalQuantity * Number(item.price)
             };
+            user.cart.push(cartItem);
         }
-        console.log(user);
-        res.redirect(`/${item._id}/seemore`);
+        await user.save();
+        req.session.message = {
+            type: 'success',
+            content: 'Item added to your cart.'
+        };
+        return res.redirect(`/${req.params.id}/seemore`);
     } catch (error) {
         console.log(`USER: Add to cart error: ${error}`);
         res.redirect("/home");
@@ -106,16 +121,118 @@ router.get("/:id/addtowishlist", indexObj.isUserLoggedin, async (req, res) => {
                 content: 'Item added to your wishlist.'
             };
         }
-        console.log(user);
-        res.redirect(`/${item._id}/seemore`);
+        res.redirect(`/home`);
     } catch (error) {
         console.log(`USER: Add to wishlist error: ${error}`);
         res.redirect("/home");
     }
 });
 
-router.get("/cart", indexObj.isUserLoggedin, (req, res) => {
-    res.render("user/cart");
+// Displaying wishlist
+router.get("/wishlist", indexObj.isUserLoggedin, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.user_id);
+        const items = await Item.find();
+        var wishlistItems = [];
+        user.wishlist.forEach(itemID => {
+            items.forEach(item => {
+                if (itemID.equals(item._id) && item.status == 'granted')
+                    wishlistItems.push(item);
+            });
+        });
+        res.render("user/wishlist", { currentUser: user, items: wishlistItems });
+    } catch (err) {
+        console.log(`USER: Displaying wishlist error: ${error}`);
+        res.redirect("/home");
+    }
+});
+
+// Removing items from wishlist
+router.post("/wishlist/:id/remove", indexObj.isUserLoggedin, async (req, res) => {
+    try {
+        const item = await Item.findById(req.params.id);
+        const user = await User.findById(req.session.user_id);
+        var doesContain = false;
+        user.wishlist = user.wishlist.filter(itemID => {
+            if (!itemID.equals(item._id)) {
+                return itemID;
+            } else {
+                doesContain = true;
+            }
+        });
+        if (doesContain) {
+            await user.save();
+            req.session.message = {
+                type: 'success',
+                content: 'Item has been removed from your wishlist.'
+            }
+        } else {
+            req.session.message = {
+                type: 'warning',
+                content: 'Item does not exist on your wishlist.'
+            }
+        }
+        res.redirect("/wishlist");
+    } catch (err) {
+        console.log(`USER: Remove from wishlist error: ${error}`);
+        res.redirect("/home");
+    }
+});
+
+// Displaying Cart
+router.get("/cart", indexObj.isUserLoggedin, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.user_id);
+        const items = await Item.find();
+        var cartItems = [];
+        var cartTotal = 0;
+        user.cart.forEach(cartItem => {
+            items.forEach(item => {
+                if (cartItem.itemID.equals(item._id) && item.status == 'granted') {
+                    var doc = {};
+                    doc.item = item;
+                    doc.totalQuantity = cartItem.totalQuantity;
+                    doc.totalPrice = cartItem.totalPrice;
+                    cartTotal += doc.totalPrice;
+                    cartItems.push(doc);
+                }
+            });
+        });
+        res.render("user/cart", { currentUser: user, items: cartItems, cartTotal });
+    } catch (err) {
+        console.log(`USER: Displaying cart error: ${error}`);
+        res.redirect("/home");
+    }
+});
+
+// Removing item from cart
+router.post("/cart/:id/remove", indexObj.isUserLoggedin, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.user_id);
+        var doesContain = false;
+        user.cart = user.cart.filter(cartItem => {
+            if (!cartItem.itemID.equals(req.params.id))
+                return cartItem;
+            else
+                doesContain = true;
+        });
+        if (doesContain) {
+            await user.save();
+            req.session.message = {
+                type: 'success',
+                content: 'Item has been removed from your cart.'
+            }
+        } else {
+            req.session.message = {
+                type: 'warning',
+                content: 'Item does not exist on your cart.'
+            }
+        }
+        res.redirect("/cart");
+    } catch (err) {
+        console.log(`USER: Removing item from cart error: ${error}`);
+        res.redirect("/home");
+    }
 });
 
 router.get("/api/items/:id", async (req, res) => {

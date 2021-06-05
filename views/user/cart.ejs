@@ -1,45 +1,75 @@
 <%- include("../partials/header") %>
     <%- include("../partials/heading") %>
 
-        <div class="container">
-            <div id="shadow-box" class="cart-container">
-                <div class="row">
-                    <div class="col-lg-4 col-md-6 col-sm-8">
-                        <div class="cart-img">
-                            <img id="shadow-box" class="cartProduct-img" src="../images/images.jpg" alt="">
-                        </div>
-                    </div>
-                    <div class="col-lg-8 col-md-6 col-sm-4">
-                        <div class="cart-info">
-                            <h3><small class="text-muted"><b>Demo item</b></small></h3>
-                            <h3><small class="text-muted">₹ 399</small></h3>
-                            <br>
-                            <div>
-                                <a class="btn btn-danger btn-sm" href="#">Remove item</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <hr>
+        <% if(message){ %>
+            <div class="alert alert-<%=message.type%> alert-dismissible" role="alert" style="text-align: center;">
+                <strong>
+                    <%=message.content%>
+                </strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
             </div>
-            <div id="shadow-box" class="cart-container">
-                <div class="row">
-                    <div class="col-lg-4 col-md-6 col-sm-8">
-                        <div class="cart-img">
-                            <img id="shadow-box" class="cartProduct-img" src="../images/image.jpg" alt="">
-                        </div>
-                    </div>
-                    <div class="col-lg-8 col-md-6 col-sm-4">
-                        <div class="cart-info">
-                            <h3><small class="text-muted"><b>Demo item</b></small></h3>
-                            <h3><small class="text-muted">₹ 399</small></h3>
-                            <br>
-                            <div>
-                                <a class="btn btn-danger btn-sm" href="#">Remove item</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <% } %>
 
-        <%- include("../partials/footer") %>
+                <h1 class="portal" style="margin-top: 30px;"><small class="text-muted"><b>MANAGE YOUR
+                            CART</b></small>
+                </h1>
+                <% if(items.length){ %>
+                    <div class="container">
+                        <% items.forEach(each=> { %>
+                            <div id="shadow-box" class="details-container">
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-6 col-sm-12">
+                                        <div class="details-img">
+                                            <img class="product-img" id="shadow-box" src="data:image/<%=each.item.image.contentType%>;base64,
+                                <%=each.item.image.data.toString('base64')%>" alt="<%= each.item.title %>">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-8 col-md-6 col-sm-12">
+                                        <div class="details-info">
+                                            <h3 id="details-item-name"><small class="text-muted"><b>
+                                                        <%= each.item.title %>
+                                                    </b></small></h3>
+                                            <h4><small class="text-muted">Quantity: <b>
+                                                        <%= each.totalQuantity %>
+                                                    </b></small></h4>
+                                            <h4><small class="text-muted">Amount: <b>₹ <%= each.totalPrice %>
+                                                    </b></small></h4>
+                                            <form action="/cart/<%= each.item._id %>/remove" method="POST">
+                                                <button class="btn btn-outline-danger btn-md">Remove</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }) %>
+                    </div>
+                    <div class="container">
+                        <div class="details-container" id="shadow-box">
+                            <div class="row" style="padding: 35px;">
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-12" style="text-align: center;">
+                                    <h4><small class="text-muted">Cart total: <b>₹ <%= cartTotal %>
+                                            </b></small></h4>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-12" style="text-align: center;">
+                                    <div class="outer">
+                                        <a id="checkout" id="inner" class="btn btn-success btn-md" href="#">Proceed to
+                                            checkout</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% }else{ %>
+                        <div id="shadow-box" class="confirmation">
+                            <h5>Team Crave For Local</h5>
+                            <hr>
+                            <p>Your cart is empty. Please add something.</p>
+                        </div>
+                        <% } %>
+                            <div class="text-center">
+                                <a class="btn btn-primary btn-lg" href="/home">GO BACK TO HOME</a>
+                            </div>
+
+                            <%- include("../partials/footer") %>

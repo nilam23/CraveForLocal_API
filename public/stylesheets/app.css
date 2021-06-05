@@ -146,7 +146,7 @@ body {
 
 @media (max-width: 500px){
     #card-item-name{
-        font-size: medium;
+        font-size: small;
     }
 }
 
@@ -182,6 +182,12 @@ body {
     }
     .details-info{
         text-align: center;
+    }
+}
+
+@media (max-width: 500px){
+    #details-item-name{
+        font-size: x-large;
     }
 }
 
@@ -330,7 +336,7 @@ body {
 /* EMAIL CONFIRMATION */
 .confirmation {
     text-align: center;
-    margin: 100px 50px 30px 50px;
+    margin: 80px 50px 50px 50px;
     padding-top: 5px;
     border: 1px solid lightgray;
 }
@@ -339,5 +345,13 @@ body {
     .confirmation{
         margin-left: 10px;
         margin-right: 10px;
+    }
+}
+
+/* CART TOTAL */
+
+@media (max-width: 380px){
+    #checkout{
+        font-size: small;
     }
 }

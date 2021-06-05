@@ -1,10 +1,14 @@
 <div class="topnav" id="myTopnav">
     <a href="/home" class="active">Home</a>
-    <a href="#">Wishlist</a>
-    <a href="/cart">Cart</a>
+    <a href="/wishlist">Wishlist</a>
+
     <% if(!currentUser) { %>
+        <a href="/cart">Cart</a>
         <a id="link-decoration" href="/signin">Log in</a>
         <% }else{ %>
+            <a href="/cart">Cart <b style="color: red;">
+                    <%= totalCartItems %>
+                </b></a>
             <a id="link-decoration" href="/logout">Log out</a>
             <% } %>
                 <a href="javascript:void(0);" class="icon" onclick="myFunction()">

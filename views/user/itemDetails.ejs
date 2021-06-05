@@ -24,24 +24,25 @@
                                 </div>
                                 <div class="col-lg-8 col-md-6 col-sm-12">
                                     <div class="details-info">
-                                        <h3><small class="text-muted"><b>
+                                        <h3 id="details-item-name"><small class="text-muted"><b>
                                                     <%= item.title %>
                                                 </b></small></h3>
-                                        <h4><small class="text-muted"><i>
+                                        <h4 id="details-item-name"><small class="text-muted"><i>
                                                     <%= item.description %>
                                                 </i></small></h4>
                                         <h3><small class="text-muted">₹ <%= item.price %></small></h3>
-                                        <a class="btn btn-primary btn-sm" href="/<%= item._id %>/addtowishlist">Add to
-                                            wishlist</a>
-                                        <a class="btn btn-warning btn-sm" href="/<%= item._id %>/addtocart">Add to
-                                            cart</a>
+                                        <form action="/<%= item._id %>/addtocart" method="POST">
+                                            <input type="number" name="quantity" placeholder="Qty" min="1"
+                                                max="<%= item.countInStock %>">
+                                            <button class="btn btn-warning btn-sm">Add to cart</button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="text-center">
-                        <a class="btn btn-primary btn-lg" href="/home">GO BACK</a>
+                        <a class="btn btn-primary btn-lg" href="/home">GO BACK TO HOME</a>
                     </div>
 
                     <%- include("../partials/footer") %>
