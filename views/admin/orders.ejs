@@ -12,13 +12,35 @@
             </div>
             <% } %>
 
-                <h1 class="portal" style="margin-top: 30px;"><small class="text-muted"><b>MANAGE YOUR
-                            ORDERS</b></small>
+                <div id="shadow-box" class="order-overview">
+                    <h3 class="text-muted"><small><b>Order Overview</b></small></h3>
+                    <hr>
+                    <h4 class="text-muted"><small>Total orders: <b>
+                                <%= totalOrders %>
+                            </b></small></h4>
+                    <hr>
+                    <h4 class="text-muted"><small>Delivered orders: <b>
+                                <%= totalDeliveredOrders %>
+                            </b></small></h4>
+                    <hr>
+                    <h4 class="text-muted"><small>Confirmed orders: <b>
+                                <%= totalConfirmedOrders %>
+                            </b></small></h4>
+                    <hr>
+                    <h4 class="text-muted"><small>Pending orders: <b>
+                                <%= totalPendingOrders %>
+                            </b></small></h4>
+                    <hr>
+                    <h4 class="text-muted"><small>Cancelled orders: <b>
+                                <%= totalCancelledOrders %>
+                            </b></small></h4>
+                </div>
+                <hr>
+                <h1 class="portal" style="margin-top: 30px;"><small class="text-muted"><b>MANAGE ORDERS</b></small>
                 </h1>
-
-                <% if(myOrders.length){ %>
+                <% if(orders.length){ %>
                     <div class="container">
-                        <% myOrders.forEach(item=> { %>
+                        <% orders.forEach(item=> { %>
                             <div id="shadow-box" class="details-container">
                                 <div class="row">
                                     <div class="col-lg-4 col-md-6 col-sm-12">
@@ -51,6 +73,9 @@
                                             <h6><small class="text-muted">Amount: <b>₹ <%= item.price %> (Qty: <%=
                                                                 item.quantity %>)</b></small>
                                             </h6>
+                                            <h6><small class="text-muted">Payment method: <b>
+                                                        <%= item.paymentMethod %>
+                                                    </b></small></h6>
                                             <h6><small class="text-muted">Ordered on: <b>
                                                         <%= item.orderedAt %>
                                                     </b></small></h6>
@@ -62,30 +87,31 @@
                                                                         <%= item.address.country %>, <%=
                                                                                 item.address.postalCode %>
                                                     </b>
-                                                    <% if(item.status !='cancelled' ) { %>
-                                                        <a class="badge badge-warning"
-                                                            href="/orders/<%= item.orderID %>/<%= item.id %>/updateaddress">Update</a>
-                                                        <%}%>
                                                 </small>
                                             </h6>
 
                                             <div id="outer1">
                                                 <% if(item.status !='cancelled' ) { %>
                                                     <form id="my-orders-btns" class="inner"
-                                                        action="/orders/<%= item.orderID %>/<%= item.id %>/cancel"
+                                                        action="/admin/orders/<%= item.orderID %>/<%= item.itemID %>/cancel"
                                                         method="POST">
-                                                        <button class="btn btn-danger btn-sm">Cancel order</button>
+                                                        <button class="btn btn-danger btn-sm">Cancel
+                                                            order</button>
                                                     </form>
-                                                    <% }else{ %>
+                                                    <% if(item.status=='pending' ) { %>
                                                         <form id="my-orders-btns" class="inner"
-                                                            action="/orders/<%= item.orderID %>/<%= item.id %>/delete"
+                                                            action="/admin/orders/<%= item.orderID %>/<%= item.itemID %>/confirm"
                                                             method="POST">
-                                                            <button class="btn btn-danger btn-sm">Delete</button>
+                                                            <button class="btn btn-success btn-sm">Confirm
+                                                                order</button>
                                                         </form>
-                                                        <% } %>
-                                                            <a id='my-orders-btns' class="btn btn-info btn-sm inner"
-                                                                href="/<%= item.id %>/seemore">Item
-                                                                details</a>
+                                                        <% }else if(item.status=='confirmed' ) { %>
+                                                            <form id="my-orders-btns" class="inner">
+                                                                <button class="btn btn-primary btn-sm" disabled>Deliver
+                                                                    order</button>
+                                                            </form>
+                                                            <% } %>
+                                                                <% } %>
                                             </div>
 
                                         </div>
@@ -98,11 +124,11 @@
                         <div id="shadow-box" class="confirmation">
                             <h5>Team Crave For Local</h5>
                             <hr>
-                            <h6>You haven't ordered anything recently. Please shop with us.</h6>
+                            <h6>Customers yet to buy products from us.</h6>
                         </div>
                         <% } %>
                             <div class="text-center">
-                                <a class="btn btn-primary btn-lg" href="/home">GO BACK TO HOME</a>
+                                <a class="btn btn-primary btn-lg" href="/admin">GO BACK</a>
                             </div>
 
                             <%- include("../partials/footer") %>

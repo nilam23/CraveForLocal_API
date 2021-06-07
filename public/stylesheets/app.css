@@ -163,14 +163,6 @@ body {
     display: block;
     margin: 5% auto;
 }
-/* 
-.product-myorders-img{
-    width: 280px;
-    height: 200px;
-    text-align: center;
-    display: block;
-    margin: 5% auto;
-} */
 
 .details-img, .details-info{
     padding: 10px;
@@ -376,6 +368,21 @@ body {
     text-align: center;
     display: block;
     margin: 100px auto 0;
+}
+
+.order-overview{
+    border: 1px solid lightgray;
+    border-radius: 2px;
+    width: 50%;
+    text-align: center;
+    display: block;
+    margin: 60px auto 0;
+}
+
+@media (max-width: 450px){
+    .order-overview{
+        font-size: x-small;
+    }
 }
 
 @media (max-width: 768px){
