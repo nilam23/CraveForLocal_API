@@ -1,0 +1,108 @@
+<%- include("../partials/header") %>
+    <%- include("../partials/heading") %>
+
+        <hr>
+        <% if(message){ %>
+            <div class="alert alert-<%=message.type%> alert-dismissible" role="alert" style="text-align: center;">
+                <strong>
+                    <%=message.content%>
+                </strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+            </div>
+            <% } %>
+
+                <h1 class="portal" style="margin-top: 30px;"><small class="text-muted"><b>MANAGE YOUR
+                            ORDERS</b></small>
+                </h1>
+
+                <% if(myOrders.length){ %>
+                    <div class="container">
+                        <% myOrders.forEach(item=> { %>
+                            <div id="shadow-box" class="details-container">
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-6 col-sm-12">
+                                        <div class="details-img">
+                                            <img class="product-img" id="shadow-box" src="data:image/<%=item.image.contentType%>;base64,
+                                <%=item.image.data.toString('base64')%>" alt="<%= item.title %>">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-8 col-md-6 col-sm-12">
+                                        <div class="details-info">
+                                            <h4 id="details-item-name"><small class="text-muted"><b>
+                                                        <%= item.title %>
+                                                            <% if(item.status=='cancelled' ){ %>
+                                                                (<b style="color: rgb(161, 29, 29);">
+                                                                    <%= item.status.toUpperCase() %>
+                                                                </b>)
+                                                                <% }else if(item.status=='confirmed' ) { %>
+                                                                    (<b style="color: rgb(59, 206, 71);">
+                                                                        <%= item.status.toUpperCase() %>
+                                                                    </b>)
+                                                                    <% }else{ %>
+                                                                        (<b style="color: rgb(200, 186, 60);">
+                                                                            <%= item.status.toUpperCase() %>
+                                                                        </b>)
+                                                                        <% } %>
+                                                    </b></small></h4>
+                                            <h6><small class="text-muted">Order id: <b>
+                                                        <%= item.orderID %>
+                                                    </b></small></h6>
+                                            <h6><small class="text-muted">Amount: <b>₹ <%= item.price %> (Qty: <%=
+                                                                item.quantity %>)</b></small>
+                                            </h6>
+                                            <h6><small class="text-muted">Ordered on: <b>
+                                                        <%= item.orderedAt %>
+                                                    </b></small></h6>
+                                            <h6><small class="text-muted"
+                                                    style="display: inline-block; margin: 0">Address: <b>
+                                                        <%= item.address.name %> (<%= item.address.phone %>), <%=
+                                                                    item.address.addressLine %>, <%= item.address.city
+                                                                        %>,
+                                                                        <%= item.address.country %>, <%=
+                                                                                item.address.postalCode %>
+                                                    </b>
+                                                    <% if(item.status !='cancelled' ) { %>
+                                                        <a class="badge badge-warning"
+                                                            href="/orders/<%= item.orderID %>/<%= item.id %>/updateaddress">Update</a>
+                                                        <%}%>
+                                                </small>
+                                            </h6>
+
+                                            <div id="outer1">
+                                                <% if(item.status !='cancelled' ) { %>
+                                                    <form id="my-orders-btns" class="inner"
+                                                        action="/orders/<%= item.orderID %>/<%= item.id %>/cancel"
+                                                        method="POST">
+                                                        <button class="btn btn-danger btn-sm">Cancel order</button>
+                                                    </form>
+                                                    <% }else{ %>
+                                                        <form id="my-orders-btns" class="inner"
+                                                            action="/orders/<%= item.orderID %>/<%= item.id %>/delete"
+                                                            method="POST">
+                                                            <button class="btn btn-danger btn-sm">Delete</button>
+                                                        </form>
+                                                        <% } %>
+                                                            <a id='my-orders-btns' class="btn btn-info btn-sm inner"
+                                                                href="/<%= item.id %>/seemore">Item
+                                                                details</a>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }) %>
+                    </div>
+                    <% } else{ %>
+                        <div id="shadow-box" class="confirmation">
+                            <h5>Team Crave For Local</h5>
+                            <hr>
+                            <h6>You haven't ordered anything recently. Please shop with us.</h6>
+                        </div>
+                        <% } %>
+                            <div class="text-center">
+                                <a class="btn btn-primary btn-lg" href="/home">GO BACK TO HOME</a>
+                            </div>
+
+                            <%- include("../partials/footer") %>

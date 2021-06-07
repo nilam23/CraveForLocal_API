@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
+const uuid = require("uuid");
 
 const User = require("../models/userCollection");
 const Admin = require("../models/adminCollection");
@@ -9,6 +10,7 @@ const Item = require("../models/itemCollection");
 const Order = require("../models/orderCollection");
 
 const indexObj = require("./index");
+const { compareSync } = require("bcrypt");
 
 // Landing Page
 router.get("/", (req, res) => {
@@ -21,10 +23,12 @@ router.get("/home", async (req, res) => {
         res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
         if (indexObj.deletePath)
             indexObj.deletePath();
-        const currentUser = await User.findOne({ _id: req.session.user_id });
+        const currentUser = await User.findById(req.session.user_id) ||
+            await Admin.findById(req.session.user_id) ||
+            await Vendor.findById(req.session.user_id);
         const items = await Item.find({ status: 'granted' });
         var totalCartItems = 0;
-        if (currentUser) {
+        if (currentUser && currentUser.userType == 'user') {
             currentUser.cart.forEach(item => {
                 totalCartItems += item.totalQuantity;
             });
@@ -39,12 +43,14 @@ router.get("/home", async (req, res) => {
 // Item details page
 router.get("/:id/seemore", async (req, res) => {
     try {
-        const currentUser = await User.findOne({ _id: req.session.user_id });
+        const currentUser = await User.findById(req.session.user_id) ||
+            await Admin.findById(req.session.user_id) ||
+            await Vendor.findById(req.session.user_id);
         const item = await Item.findById(req.params.id);
         if (item.status == 'pending')
             return res.render("accessDeny");
         var totalCartItems = 0;
-        if (currentUser) {
+        if (currentUser && currentUser.userType == 'user') {
             currentUser.cart.forEach(item => {
                 totalCartItems += item.totalQuantity;
             });
@@ -140,7 +146,7 @@ router.get("/wishlist", indexObj.isUserLoggedin, async (req, res) => {
                     wishlistItems.push(item);
             });
         });
-        res.render("user/wishlist", { currentUser: user, items: wishlistItems });
+        res.render("user/myWishlist", { currentUser: user, items: wishlistItems });
     } catch (err) {
         console.log(`USER: Displaying wishlist error: ${error}`);
         res.redirect("/home");
@@ -198,7 +204,7 @@ router.get("/cart", indexObj.isUserLoggedin, async (req, res) => {
                 }
             });
         });
-        res.render("user/cart", { currentUser: user, items: cartItems, cartTotal });
+        res.render("user/myCart", { currentUser: user, items: cartItems, cartTotal });
     } catch (err) {
         console.log(`USER: Displaying cart error: ${error}`);
         res.redirect("/home");
@@ -234,6 +240,206 @@ router.post("/cart/:id/remove", indexObj.isUserLoggedin, async (req, res) => {
         res.redirect("/home");
     }
 });
+
+// Checkout
+router.get("/checkout", indexObj.isUserLoggedin, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.user_id);
+        if (!user.cart.length)
+            return res.render("user/denyCheckout");
+        var totalItems = 0;
+        var totalPrice = 0;
+        var deliveryCharge = 'FREE';
+        user.cart.forEach(item => {
+            totalItems += item.totalQuantity;
+            totalPrice += item.totalPrice;
+        });
+        res.render("user/checkout", { totalItems, totalPrice, deliveryCharge });
+    } catch (err) {
+        console.log(`USER: Proceed to checkout error: ${error}`);
+        res.redirect("/cart");
+    }
+});
+
+// Place an order
+router.post("/placeorder", indexObj.isUserLoggedin, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.user_id);
+        if (!user.cart.length)
+            return res.render("user/denyCheckout");
+        var items = user.cart;
+        var totalPrice = 0;
+        const orderID = uuid.v4();
+        user.cart.forEach(item => totalPrice += item.totalPrice);
+        const orderDocument = new Order({
+            orderID,
+            userID: req.session.user_id,
+            shippingAddress: req.body.address,
+            items,
+            paymentMethod: req.body.paymentMethod,
+            totalPrice
+        });
+        await orderDocument.save();
+        user.cart = [];
+        await user.save();
+        req.session.order_id = orderID;
+        req.session.order_exec = true;
+        res.redirect("/ordersuccess");
+    } catch (error) {
+        console.log(`USER: Order error: ${error}`);
+        res.redirect("/orderfailure");
+    }
+});
+
+// Order success redirect
+router.get('/ordersuccess', (req, res) => {
+    if (!req.session.order_exec)
+        return res.render("accessDeny");
+    var orderID = req.session.order_id;
+    req.session.order_id = null;
+    req.session.order_exec = null;
+    res.render("user/orderSuccess", { orderID });
+});
+
+//  Order failure redirect
+router.get('/ordersuccess', (req, res) => {
+    if (!req.session.order_exec)
+        return res.render("accessDeny");
+    req.session.order_id = null;
+    req.session.order_exec = null;
+    res.render("user/orderFailure");
+});
+
+// Viewing my orders
+router.get("/orders", indexObj.isUserLoggedin, async (req, res) => {
+    try {
+        const orders = await Order.find({ userID: req.session.user_id });
+        const items = await Item.find({ status: 'granted' });
+        var myOrders = [];
+        orders.forEach(order => {
+            order.items.forEach(orderItem => {
+                items.forEach(item => {
+                    if (orderItem.itemID.equals(item._id)) {
+                        var doc = {};
+                        doc.id = orderItem.itemID;
+                        doc.title = item.title;
+                        doc.image = item.image;
+                        doc.quantity = orderItem.totalQuantity;
+                        doc.price = orderItem.totalPrice;
+                        doc.status = orderItem.status;
+                        doc.address = order.shippingAddress;
+                        doc.orderID = order.orderID;
+                        doc.orderedAt = order.orderedAt.toLocaleDateString();
+                        myOrders.push(doc);
+                    }
+                });
+            });
+        });
+        res.render("user/myOrders", { myOrders });
+    } catch (error) {
+        console.log(`USER: Viewing my orders error: ${error}`);
+        res.redirect("/orderfailure");
+    }
+});
+
+// Updating shipping address from my orders
+router.get('/orders/:orderID/:itemID/updateaddress', indexObj.isUserLoggedin, async (req, res) => {
+    try {
+        const { orderID, itemID } = req.params;
+        const order = await Order.findOne({ orderID: orderID });
+        var deny = false;
+        if (!order || !order.userID.equals(req.session.user_id))
+            return res.render("accessDeny");
+        order.items.forEach(item => {
+            if (item.itemID == itemID && item.status == 'cancelled')
+                deny = true;
+        });
+        if (!deny)
+            return res.render("user/updateShippingAddress", { address: order.shippingAddress, orderID, itemID });
+        res.render("accessDeny");
+    } catch (error) {
+        console.log(`USER: Updating shipping address error: ${error}`);
+        res.redirect("/orders");
+    }
+});
+
+router.post('/orders/:orderID/:itemID/updateaddress', indexObj.isUserLoggedin, async (req, res) => {
+    try {
+        const { orderID, itemID } = req.params;
+        const order = await Order.findOne({ orderID: orderID });
+        var deny = false;
+        if (!order || !order.userID.equals(req.session.user_id))
+            return res.render("accessDeny");
+        order.items.forEach(item => {
+            if (item.itemID == itemID && item.status == 'cancelled')
+                deny = true;
+        });
+        if (!deny) {
+            order.shippingAddress = req.body.address;
+            await order.save();
+            req.session.message = {
+                type: 'success',
+                content: 'Shipping address has been updated.'
+            }
+            return res.redirect("/orders");
+        }
+        res.render("accessDeny");
+    } catch (error) {
+        console.log(`USER: Updating shipping address (POST) error: ${error}`);
+        res.redirect("/orders");
+    }
+});
+
+// Cancelling order
+router.post("/orders/:orderID/:itemID/cancel", indexObj.isUserLoggedin, async (req, res) => {
+    try {
+        const { orderID, itemID } = req.params;
+        const order = await Order.findOne({ orderID: orderID });
+        if (!order || !order.userID.equals(req.session.user_id))
+            return res.render('accessDeny');
+        order.items.forEach(item => {
+            if (item.itemID == itemID && (item.status == 'pending' || item.status == 'confirmed')) {
+                item.status = 'cancelled';
+                req.session.message = {
+                    type: 'success',
+                    content: `Your ordered item has been cancelled.`
+                }
+            }
+        });
+        await order.save();
+        res.redirect("/orders");
+    } catch (error) {
+        console.log(`USER: Cancelling order error: ${error}`);
+        res.redirect("/orders");
+    }
+});
+
+// Deleting order after cancellation
+router.post("/orders/:orderID/:itemID/delete", indexObj.isUserLoggedin, async (req, res) => {
+    try {
+        const { orderID, itemID } = req.params;
+        const order = await Order.findOne({ orderID: orderID });
+        if (!order || !order.userID.equals(req.session.user_id))
+            return res.render('accessDeny');
+        for (let i = 0; i < order.items.length; i++) {
+            let item = order.items[i];
+            if (item.itemID == itemID && item.status == 'cancelled')
+                order.items.pop(item);
+        }
+        if (!order.items.length)
+            await order.remove();
+        else
+            await order.save();
+        req.session.message = {
+            type: 'success',
+            content: 'Your order has been deleted.'
+        }
+        res.redirect("/orders");
+    } catch (error) {
+        console.log(`USER: Deleting order error: ${error}`);
+        res.redirect("/orders");
+    }
+})
 
 router.get("/api/items/:id", async (req, res) => {
     try {

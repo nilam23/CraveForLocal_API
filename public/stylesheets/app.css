@@ -159,7 +159,18 @@ body {
 .product-img{
     width: 280px;
     height: 200px;
+    text-align: center;
+    display: block;
+    margin: 5% auto;
 }
+/* 
+.product-myorders-img{
+    width: 280px;
+    height: 200px;
+    text-align: center;
+    display: block;
+    margin: 5% auto;
+} */
 
 .details-img, .details-info{
     padding: 10px;
@@ -355,3 +366,27 @@ body {
         font-size: small;
     }
 }
+
+/* CHECKOUT */
+
+.cart-overview{
+    border: 1px solid lightgray;
+    border-radius: 2px;
+    width: 70%;
+    text-align: center;
+    display: block;
+    margin: 100px auto 0;
+}
+
+@media (max-width: 768px){
+    .cart-overview{
+        margin-top: 50px;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 768px){
+    #my-orders-btns{
+        margin: 0 2px 0 2px;
+    }
+} 

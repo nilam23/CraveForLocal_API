@@ -1,0 +1,45 @@
+<%- include("../partials/header") %>
+    <%- include("../partials/heading") %>
+
+        <hr>
+        <div class="signup-form">
+            <form action="/orders/<%= orderID%>/<%= itemID %>/updateaddress" method="POST">
+                <h2 style="text-align: center;"><small class="text-muted"><b>Update your address</b></small>
+                </h2>
+                <hr>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="address[name]" value="<%= address.name %>"
+                        placeholder="Your name" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" class="form-control" name="address[email]" value="<%= address.email %>"
+                        placeholder="Your email" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="phone" name="address[phone]"
+                        value="<%= address.phone %>" placeholder="Your phone number" required="required">
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" name="address[addressLine]" placeholder="Your address line"
+                        required><%= address.addressLine %></textarea>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="address[city]" value="<%= address.city %>"
+                        placeholder="Your city" required="required">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="address[postalCode]" value="<%= address.postalCode %>"
+                        placeholder="Your postal code" required="required">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="address[country]" value="<%= address.country %>"
+                        placeholder="Your country" required="required">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">Update</button>
+                </div>
+            </form>
+        </div>
+        <div class="text-center">
+            <a class="btn btn-primary btn-lg" href="/orders">GO BACK</a>
+        </div><br>

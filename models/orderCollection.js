@@ -2,13 +2,21 @@ const mongoose = require("mongoose");
 
 const orderSchema = mongoose.Schema(
   {
+    orderID: {
+      type: String,
+      unique: true,
+      required: true
+    },
     userID: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "User",
     },
     shippingAddress: {
-      address: { type: String, required: true },
+      name: { type: String, required: true },
+      email: { type: String, required: true },
+      phone: { type: String, required: true },
+      addressLine: { type: String, required: true },
       city: { type: String, required: true },
       postalCode: { type: String, required: true },
       country: { type: String, required: true },
@@ -17,15 +25,27 @@ const orderSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    itemId: [
+    items: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: "Item",
-      },
+        itemID: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          ref: "Item",
+        },
+        totalQuantity: {
+          type: Number,
+          required: true
+        },
+        totalPrice: {
+          type: Number,
+          required: true
+        },
+        status: {
+          type: String,
+          default: 'pending'
+        }
+      }
     ],
-    qty: [Number],
-    price: [Number],
     totalPrice: {
       type: Number,
       required: true,
@@ -35,9 +55,6 @@ const orderSchema = mongoose.Schema(
       required: true,
       default: false,
     },
-    paidAt: {
-      type: Date,
-    },
     isDelivered: {
       type: Boolean,
       required: true,
@@ -45,10 +62,11 @@ const orderSchema = mongoose.Schema(
     },
     orderedAt: {
       type: Date,
+      default: Date.now
     },
     deliveredAt: {
       type: Date,
-    },
+    }
   },
   {
     timestamps: true,

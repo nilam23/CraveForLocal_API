@@ -1,0 +1,89 @@
+<%- include("../partials/header") %>
+    <%- include("../partials/heading") %>
+
+        <hr>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-5 col-md-5 col-sm-12 col-12">
+                    <div id="shadow-box" class="cart-overview">
+                        <h3 class="text-muted"><small><b>Cart Overview</b></small></h3>
+                        <hr>
+                        <h5 class="text-muted"><small>Total items: <b>
+                                    <%= totalItems %>
+                                </b></small></h5>
+                        <hr>
+                        <h5 class="text-muted"><small>Delivery charge: <b style="color: rgb(70, 170, 70);">
+                                    <%= deliveryCharge %>
+                                </b></small></h5>
+                        <hr>
+                        <h5 class="text-muted"><small>Total price: <b>
+                                    <%= totalPrice %>
+                                </b></small></h5>
+                        <a class="btn btn-warning btn-sm" href="/cart" style="margin: 3px 0 8px 0;">Review cart</a>
+                    </div>
+                </div>
+                <div class="col-lg-7 col-md-7 col-sm-12 col-12">
+                    <div class="signup-form">
+                        <form action="/placeorder" method="POST">
+                            <h2 style="text-align: center;"><small class="text-muted"><b>Fill up your
+                                        details</b></small></h2>
+                            <hr>
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="address[name]" placeholder="Your name"
+                                    required="required">
+                            </div>
+                            <div class="form-group">
+                                <input type="email" class="form-control" name="address[email]" placeholder="Your email"
+                                    required="required">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="phone" name="address[phone]"
+                                    placeholder="Phone Number" required="required">
+                            </div>
+                            <div class="form-group">
+                                <textarea class="form-control" name="address[addressLine]"
+                                    placeholder="Your address line"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="address[city]"
+                                    placeholder="Your city name" required="required">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="address[postalCode]"
+                                    placeholder="Your pin number" required="required">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="address[country]"
+                                    placeholder="Your country name" required="required">
+                            </div>
+                            <div class="form-group">
+                                <label for="paymentMethod">Payment method</label>
+                                <select class="form-control" name="paymentMethod" required>
+                                    <option>Payment method</option>
+                                    <option value="COD">Cash on delivery</option>
+                                    <option value="CARD" disabled>Card payment</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-block btn-lg">Place Order</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <script>
+            var input = document.querySelector("#phone");
+            window.intlTelInput(input, {
+                separateDialCode: true,
+                customPlaceholder: function (
+                    selectedCountryPlaceholder,
+                    selectedCountryData
+                ) {
+                    return "e.g. " + selectedCountryPlaceholder;
+                },
+            });
+        </script>
