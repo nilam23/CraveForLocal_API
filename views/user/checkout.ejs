@@ -60,7 +60,7 @@
                             <div class="form-group">
                                 <label for="paymentMethod">Payment method</label>
                                 <select class="form-control" name="paymentMethod" required>
-                                    <option>Payment method</option>
+                                    <option selected="true" disabled="disabled">Payment method</option>
                                     <option value="COD">Cash on delivery</option>
                                     <option value="CARD" disabled>Card payment</option>
                                 </select>
@@ -73,17 +73,7 @@
                 </div>
             </div>
         </div>
-
-
-        <script>
-            var input = document.querySelector("#phone");
-            window.intlTelInput(input, {
-                separateDialCode: true,
-                customPlaceholder: function (
-                    selectedCountryPlaceholder,
-                    selectedCountryData
-                ) {
-                    return "e.g. " + selectedCountryPlaceholder;
-                },
-            });
-        </script>
+        <hr><br>
+        <div class="text-center">
+            <a class="btn btn-primary btn-lg" href="/cart">GO BACK TO CART</a>
+        </div><br><br>

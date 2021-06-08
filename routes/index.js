@@ -30,7 +30,7 @@ const isUserLoggedin = async (req, res, next) => {
                 redirectPath = '';
                 req.session.message = {
                     type: "warning",
-                    content: "You are not authorized to visit the page."
+                    content: "Your request has been denied."
                 };
                 return res.redirect("/home");
             }
@@ -57,7 +57,7 @@ const isVendorLoggedin = async (req, res, next) => {
                 redirectPath = '';
                 req.session.message = {
                     type: "warning",
-                    content: "You are not authorized to visit the page."
+                    content: "Your request has been denied."
                 };
                 return res.redirect("/home");
             }
@@ -84,7 +84,7 @@ const isAdminLoggedin = async (req, res, next) => {
                 redirectPath = '';
                 req.session.message = {
                     type: "warning",
-                    content: "You are not authorized to visit the page."
+                    content: "Your request has been denied."
                 };
                 return res.redirect("/home");
             }
@@ -148,7 +148,6 @@ router.post("/signup", async (req, res) => {
         const user = await User.findOne({ email });
         if (!user) {
             var hashedPassword = await bcrypt.hash(password, 12);
-            // var hashedPassword = password;
             const newUser = new User({
                 name,
                 email,
@@ -202,7 +201,6 @@ router.post("/signin", async (req, res) => {
                 type: "danger",
                 content: "Incorrect email or password."
             };
-            // redirectPath = '';
             res.redirect("/signin");
         } else {
             var userType;
@@ -212,7 +210,7 @@ router.post("/signin", async (req, res) => {
                 if (redirectPath.split('/')[1] == 'admin' || redirectPath.split('/')[1] == 'vendor') {
                     req.session.message = {
                         type: 'warning',
-                        content: 'You are not authorized to visit the page.'
+                        content: 'Your request has been denied.'
                     };
                     redirectPath = '';
                     return res.redirect('/home');
@@ -221,10 +219,10 @@ router.post("/signin", async (req, res) => {
                 userPassword = user.password;
                 userId = user._id;
             } else if (admin) {
-                if (redirectPath.split('/')[1] == 'cart' || redirectPath.split('/')[1] == 'wishlist' || redirectPath.split('/')[1] == 'vendor') {
+                if (redirectPath.split('/')[1] == 'cart' || redirectPath.split('/')[1] == 'wishlist' || redirectPath.split('/')[1] == 'orders' || redirectPath.split('/')[1] == 'vendor') {
                     req.session.message = {
                         type: 'warning',
-                        content: 'You are not authorized to visit the page.'
+                        content: 'Your request has been denied.'
                     };
                     redirectPath = '';
                     return res.redirect('/home');
@@ -233,10 +231,10 @@ router.post("/signin", async (req, res) => {
                 userPassword = admin.password;
                 userId = admin._id;
             } else {
-                if (redirectPath.split('/')[1] == 'cart' || redirectPath.split('/')[1] == 'wishlist' || redirectPath.split('/')[1] == 'admin') {
+                if (redirectPath.split('/')[1] == 'cart' || redirectPath.split('/')[1] == 'wishlist' || redirectPath.split('/')[1] == 'orders' || redirectPath.split('/')[1] == 'admin') {
                     req.session.message = {
                         type: 'warning',
-                        content: 'You are not authorized to visit the page.'
+                        content: 'Your request has been denied.'
                     };
                     redirectPath = '';
                     return res.redirect('/home');
@@ -247,7 +245,6 @@ router.post("/signin", async (req, res) => {
             }
             const validation = await bcrypt.compare(password, userPassword);
             if (validation) {
-                // if (password == user.password) {
                 req.session.user_id = userId;
                 if (userType == "user") {
                     if (redirectPath) {
@@ -300,7 +297,6 @@ router.post("/signin", async (req, res) => {
                     type: "danger",
                     content: "Incorrect email or password."
                 };
-                // redirectPath = '';
                 res.redirect("/signin");
             }
         }
@@ -497,6 +493,7 @@ router.post("/resetpassword/:id/:token", isLoggedout, async (req, res) => {
             }
         } catch (err) {
             console.log(`---PASSWORD RESET ERROR: ${err}.---`);
+            res.redirect("/forgotpassword");
         }
     }
 });
