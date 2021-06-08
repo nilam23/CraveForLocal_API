@@ -211,6 +211,31 @@ router.get("/cart", indexObj.isUserLoggedin, async (req, res) => {
     }
 });
 
+// Updating cart details
+router.post('/cart/:id/update', indexObj.isUserLoggedin, async (req, res) => {
+    try {
+        const item = await Item.findById(req.params.id);
+        const user = await User.findById(req.session.user_id);
+        const itemPrice = item.price;
+        var quantity;
+        if (req.body.quantity == '')
+            quantity = 1;
+        else
+            quantity = Number(req.body.quantity);
+        user.cart.forEach(cartItem => {
+            if (cartItem.itemID.equals(req.params.id)) {
+                cartItem.totalQuantity = quantity;
+                cartItem.totalPrice = quantity * itemPrice;
+            }
+        });
+        await user.save();
+        res.redirect("/cart");
+    } catch (error) {
+        console.log(`USER: Updating cart error: ${error}`);
+        res.redirect("/home");
+    }
+})
+
 // Removing item from cart
 router.post("/cart/:id/remove", indexObj.isUserLoggedin, async (req, res) => {
     try {
@@ -439,46 +464,6 @@ router.post("/orders/:orderID/:itemID/delete", indexObj.isUserLoggedin, async (r
         console.log(`USER: Deleting order error: ${error}`);
         res.redirect("/orders");
     }
-})
-
-router.get("/api/items/:id", async (req, res) => {
-    try {
-        const item = await Item.find({ _id: req.params.id });
-        if (item) {
-            res.json(item);
-        } else {
-            res.status(404).json({ message: "Product Not Found" });
-        }
-    } catch (error) {
-        res.status(404).json("failed");
-    }
 });
-
-router.get("/api/users/:id", async (req, res) => {
-    try {
-        const user = await User.find({ _id: req.params.id });
-        if (user) {
-            res.json(user);
-        } else {
-            res.status(404).json({ message: "User Not Found" });
-        }
-    } catch (error) {
-        res.status(404).json("failed");
-    }
-});
-
-router.get("/api/user/orders/:id", async (req, res) => {
-    try {
-        const orders = await Order.find({ user: req.params.id });
-        if (orders) {
-            res.json(orders);
-        } else {
-            res.status(404).json({ message: "Not Found" });
-        }
-    } catch (error) {
-        res.status(404).json("failed");
-    }
-});
-
 
 module.exports = router;
