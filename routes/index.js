@@ -13,6 +13,7 @@ const Vendor = require("../models/vendorCollection");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 //  Middlewares: isLoggedin
+var cache = {};
 var redirectPath = '';
 var isSet = false;
 var deletePath = () => {
@@ -38,6 +39,11 @@ const isUserLoggedin = async (req, res, next) => {
             console.log(`---USER-LOGGED-IN middleware error: ${err}.---`);
             res.redirect("/home");
         }
+    }
+    //For handling POST requests if not logged in
+    if (req.method == 'POST') {
+        cache.method = req.method;
+        cache.body = req.body;
     }
     req.session.message = {
         type: 'warning',
@@ -254,6 +260,12 @@ router.post("/signin", async (req, res) => {
                             type: "success",
                             content: `Welcome back ${user.name.split(' ')[0]}.`
                         };
+                        if (Object.entries(cache).length) {
+                            req.session.cache = cache;
+                            cache = {};
+                            if (req.session.cache.method == 'POST')
+                                return res.redirect(307, `${path}`);
+                        }
                         return res.redirect(`${path}`);
                     }
                     req.session.message = {

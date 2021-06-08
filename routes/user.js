@@ -71,10 +71,17 @@ router.post("/:id/addtocart", indexObj.isUserLoggedin, async (req, res) => {
         const user = await User.findById(req.session.user_id);
         var isAlreadyAdded = false;
         var totalQuantity;
-        if (req.body.quantity == '')
-            totalQuantity = 1;
-        else
-            totalQuantity = Number(req.body.quantity);
+        if (req.session.cache) {
+            if (req.session.cache.body.quantity == '')
+                totalQuantity = 1;
+            else
+                totalQuantity = Number(req.session.cache.body.quantity);
+        } else {
+            if (req.body.quantity == '')
+                totalQuantity = 1;
+            else
+                totalQuantity = Number(req.body.quantity);
+        }
         user.cart.forEach(cartItem => {
             if (cartItem.itemID.equals(item._id)) {
                 cartItem.totalQuantity += totalQuantity;
@@ -95,6 +102,7 @@ router.post("/:id/addtocart", indexObj.isUserLoggedin, async (req, res) => {
             type: 'success',
             content: 'Item added to your cart.'
         };
+        delete req.session.cache;
         return res.redirect(`/${req.params.id}/seemore`);
     } catch (error) {
         console.log(`USER: Add to cart error: ${error}`);
@@ -178,6 +186,7 @@ router.post("/wishlist/:id/remove", indexObj.isUserLoggedin, async (req, res) =>
                 content: 'Item does not exist on your wishlist.'
             }
         }
+        delete req.session.cache;
         res.redirect("/wishlist");
     } catch (err) {
         console.log(`USER: Remove from wishlist error: ${error}`);
@@ -218,17 +227,29 @@ router.post('/cart/:id/update', indexObj.isUserLoggedin, async (req, res) => {
         const user = await User.findById(req.session.user_id);
         const itemPrice = item.price;
         var quantity;
-        if (req.body.quantity == '')
-            quantity = 1;
-        else
-            quantity = Number(req.body.quantity);
+        if (req.session.cache) {
+            if (req.session.cache.body.quantity == '')
+                quantity = 1;
+            else
+                quantity = Number(req.session.cache.body.quantity);
+        } else {
+            if (req.body.quantity == '')
+                quantity = 1;
+            else
+                quantity = Number(req.body.quantity);
+        }
         user.cart.forEach(cartItem => {
             if (cartItem.itemID.equals(req.params.id)) {
                 cartItem.totalQuantity = quantity;
                 cartItem.totalPrice = quantity * itemPrice;
             }
         });
+        req.session.message = {
+            type: 'success',
+            content: 'Your cart has been updated.'
+        };
         await user.save();
+        delete req.session.cache;
         res.redirect("/cart");
     } catch (error) {
         console.log(`USER: Updating cart error: ${error}`);
@@ -259,6 +280,7 @@ router.post("/cart/:id/remove", indexObj.isUserLoggedin, async (req, res) => {
                 content: 'Item does not exist on your cart.'
             }
         }
+        delete req.session.cache;
         res.redirect("/cart");
     } catch (err) {
         console.log(`USER: Removing item from cart error: ${error}`);
@@ -296,12 +318,20 @@ router.post("/placeorder", indexObj.isUserLoggedin, async (req, res) => {
         var totalPrice = 0;
         const orderID = uuid.v4();
         user.cart.forEach(item => totalPrice += item.totalPrice);
+        var shippingAddress;
+        if (req.session.cache) {
+            shippingAddress = req.session.cache.body.address;
+            paymentMethod = req.session.cache.body.paymentMethod;
+        } else {
+            shippingAddress = req.body.address;
+            paymentMethod = req.body.paymentMethod;
+        }
         const orderDocument = new Order({
             orderID,
             userID: req.session.user_id,
-            shippingAddress: req.body.address,
+            shippingAddress,
             items,
-            paymentMethod: req.body.paymentMethod,
+            paymentMethod,
             totalPrice
         });
         await orderDocument.save();
@@ -309,6 +339,7 @@ router.post("/placeorder", indexObj.isUserLoggedin, async (req, res) => {
         await user.save();
         req.session.order_id = orderID;
         req.session.order_exec = true;
+        delete req.session.cache;
         res.redirect("/ordersuccess");
     } catch (error) {
         console.log(`USER: Order error: ${error}`);
@@ -327,7 +358,7 @@ router.get('/ordersuccess', (req, res) => {
 });
 
 //  Order failure redirect
-router.get('/ordersuccess', (req, res) => {
+router.get('/orderfailure', (req, res) => {
     if (!req.session.order_exec)
         return res.render("accessDeny");
     req.session.order_id = null;
@@ -400,12 +431,16 @@ router.post('/orders/:orderID/:itemID/updateaddress', indexObj.isUserLoggedin, a
                 deny = true;
         });
         if (!deny) {
-            order.shippingAddress = req.body.address;
+            if (req.session.cache)
+                order.shippingAddress = req.session.cache.body.address;
+            else
+                order.shippingAddress = req.body.address;
             await order.save();
             req.session.message = {
                 type: 'success',
                 content: 'Shipping address has been updated.'
             }
+            delete req.session.cache;
             return res.redirect("/orders");
         }
         res.render("accessDeny");
@@ -432,6 +467,7 @@ router.post("/orders/:orderID/:itemID/cancel", indexObj.isUserLoggedin, async (r
             }
         });
         await order.save();
+        delete req.session.cache;
         res.redirect("/orders");
     } catch (error) {
         console.log(`USER: Cancelling order error: ${error}`);
@@ -459,6 +495,7 @@ router.post("/orders/:orderID/:itemID/delete", indexObj.isUserLoggedin, async (r
             type: 'success',
             content: 'Your order has been deleted.'
         }
+        delete req.session.cache;
         res.redirect("/orders");
     } catch (error) {
         console.log(`USER: Deleting order error: ${error}`);
