@@ -405,23 +405,13 @@ router.post("/forgotpassword", isLoggedout, async (req, res) => {
                 id: userId
             };
             const token = jwt.sign(payload, secret, { expiresIn: '15m' });
-            const link = `http://localhost:3000/resetpassword/${userId}/${token}`;
+            const link = `https://craveforlocal.herokuapp.com/resetpassword/${userId}/${token}` || `http://localhost:3000/resetpassword/${userId}/${token}`;
             const mailOptions = {
                 from: `${process.env.ADMIN_NAME} <${process.env.ADMIN_EMAIL}>`,
                 to: `${userEmail}`,
                 subject: 'Crave For Local: Email verification link for password reset.',
                 text: `To reset your email, please click on the this link: ${link}`
             };
-            // mailScript.transporter.sendMail(mailOptions, (err, info) => {
-            //     if (err) {
-            //         req.session.message = {
-            //             type: 'danger',
-            //             content: 'Email could not be sent.'
-            //         };
-            //         return res.redirect("/forgotpassword");
-            //     }
-            // });
-            console.log(link);
             res.render("emailConfirmation");
         }
 
