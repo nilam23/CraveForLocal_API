@@ -1,7 +1,6 @@
 <%- include("../partials/header") %>
     <%- include("../partials/heading") %>
 
-        <hr>
         <% if(message){ %>
             <div class="alert alert-<%=message.type%> alert-dismissible" role="alert" style="text-align: center;">
                 <strong>
@@ -12,6 +11,7 @@
             </div>
             <% } %>
 
+                <br>
                 <h1 class="portal" style="margin-top: 30px;"><small class="text-muted"><b>MANAGE ORDERS</b></small>
                 </h1>
                 <% if(orders.length){ %>

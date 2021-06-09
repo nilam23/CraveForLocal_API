@@ -1,12 +1,7 @@
 <%- include("../partials/header") %>
     <%- include("../partials/heading") %>
 
-        <hr>
-        <h1 class="portal"><small class="text-muted"><b>ADMIN PORTAL</b></small></h1>
-        <div class="av-text-center">
-            <a class="btn btn-danger btn-lg" href="/logout">LOG OUT</a>
-        </div>
-        <hr>
+        <br>
         <div class="signup-form">
             <form action="/admin/vendors/<%= vendor._id %>/contact" method="POST">
                 <h2>Contact vendor</h2>

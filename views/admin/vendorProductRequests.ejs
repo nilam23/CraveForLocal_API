@@ -1,8 +1,6 @@
 <%- include("../partials/header") %>
     <%- include("../partials/heading") %>
 
-
-        <hr>
         <% if(message){ %>
             <div class="alert alert-<%=message.type%> alert-dismissible" role="alert" style="text-align: center;">
                 <strong>
@@ -13,8 +11,8 @@
             </div>
             <% } %>
 
+                <br>
                 <h2 class="portal"><small class="text-muted"><b>Vendors' Product Requests</b></small></h2>
-
                 <% if(!productGrantReqs.length){ %>
                     <h5 class="text-center"><small class="text-muted"><b style="color: indianred;"><i>No vendor has
                                     added anything recently.</i></b></small>

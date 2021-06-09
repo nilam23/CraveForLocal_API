@@ -12,13 +12,8 @@ const Order = require("../models/orderCollection");
 const indexObj = require("./index");
 const { compareSync } = require("bcrypt");
 
-// Landing Page
-router.get("/", (req, res) => {
-    res.render("landing");
-});
-
 // Home page
-router.get("/home", async (req, res) => {
+router.get("/", async (req, res) => {
     try {
         res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
         if (indexObj.deletePath)
@@ -58,7 +53,7 @@ router.get("/:id/seemore", async (req, res) => {
         res.render("user/itemDetails", { currentUser, item, totalCartItems });
     } catch (error) {
         console.log(`USER: Item details error: ${error}`);
-        res.redirect("/home");
+        res.redirect("/");
     }
 });
 
@@ -106,7 +101,7 @@ router.post("/:id/addtocart", indexObj.isUserLoggedin, async (req, res) => {
         return res.redirect(`/${req.params.id}/seemore`);
     } catch (error) {
         console.log(`USER: Add to cart error: ${error}`);
-        res.redirect("/home");
+        res.redirect("/");
     }
 });
 
@@ -135,10 +130,10 @@ router.get("/:id/addtowishlist", indexObj.isUserLoggedin, async (req, res) => {
                 content: 'Item added to your wishlist.'
             };
         }
-        res.redirect(`/home`);
+        res.redirect(`/`);
     } catch (error) {
         console.log(`USER: Add to wishlist error: ${error}`);
-        res.redirect("/home");
+        res.redirect("/");
     }
 });
 
@@ -155,9 +150,9 @@ router.get("/wishlist", indexObj.isUserLoggedin, async (req, res) => {
             });
         });
         res.render("user/myWishlist", { currentUser: user, items: wishlistItems });
-    } catch (err) {
+    } catch (error) {
         console.log(`USER: Displaying wishlist error: ${error}`);
-        res.redirect("/home");
+        res.redirect("/");
     }
 });
 
@@ -188,9 +183,9 @@ router.post("/wishlist/:id/remove", indexObj.isUserLoggedin, async (req, res) =>
         }
         delete req.session.cache;
         res.redirect("/wishlist");
-    } catch (err) {
+    } catch (error) {
         console.log(`USER: Remove from wishlist error: ${error}`);
-        res.redirect("/home");
+        res.redirect("/");
     }
 });
 
@@ -214,9 +209,9 @@ router.get("/cart", indexObj.isUserLoggedin, async (req, res) => {
             });
         });
         res.render("user/myCart", { currentUser: user, items: cartItems, cartTotal });
-    } catch (err) {
+    } catch (error) {
         console.log(`USER: Displaying cart error: ${error}`);
-        res.redirect("/home");
+        res.redirect("/");
     }
 });
 
@@ -253,7 +248,7 @@ router.post('/cart/:id/update', indexObj.isUserLoggedin, async (req, res) => {
         res.redirect("/cart");
     } catch (error) {
         console.log(`USER: Updating cart error: ${error}`);
-        res.redirect("/home");
+        res.redirect("/");
     }
 })
 
@@ -282,9 +277,9 @@ router.post("/cart/:id/remove", indexObj.isUserLoggedin, async (req, res) => {
         }
         delete req.session.cache;
         res.redirect("/cart");
-    } catch (err) {
+    } catch (error) {
         console.log(`USER: Removing item from cart error: ${error}`);
-        res.redirect("/home");
+        res.redirect("/");
     }
 });
 
@@ -302,7 +297,7 @@ router.get("/checkout", indexObj.isUserLoggedin, async (req, res) => {
             totalPrice += item.totalPrice;
         });
         res.render("user/checkout", { totalItems, totalPrice, deliveryCharge });
-    } catch (err) {
+    } catch (error) {
         console.log(`USER: Proceed to checkout error: ${error}`);
         res.redirect("/cart");
     }

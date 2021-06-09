@@ -1,7 +1,6 @@
 <%- include("../partials/header") %>
     <%- include("../partials/heading") %>
 
-        <hr>
         <% if(message){ %>
             <div class="alert alert-<%=message.type%> alert-dismissible" role="alert" style="text-align: center;">
                 <strong>
@@ -12,6 +11,7 @@
             </div>
             <% } %>
 
+                <br>
                 <% if(!items.length){ %>
                     <div id="shadow-box" class="confirmation">
                         <h5>Team Crave For Local</h5>
@@ -19,6 +19,7 @@
                         <p>No item to be displayed on this category.</p>
                     </div>
                     <% }else{ %>
+                        <h2 class="portal"><small class="text-muted"><b>View your products</b></small></h2>
                         <div class="container">
                             <div class="row">
                                 <% items.forEach( item=> { %>

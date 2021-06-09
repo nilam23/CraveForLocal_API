@@ -1,7 +1,6 @@
 <%- include("../partials/header") %>
     <%- include("../partials/heading") %>
 
-        <hr>
         <% if(message){ %>
             <div class="alert alert-<%=message.type%> alert-dismissible" role="alert" style="text-align: center;">
                 <strong>
@@ -12,6 +11,7 @@
             </div>
             <% } %>
 
+                <br>
                 <h1 class="portal"><small class="text-muted"><b>ADMIN PORTAL</b></small></h1>
                 <div class="av-text-center">
                     <a class="btn btn-danger btn-lg" href="/logout">LOG OUT</a>
@@ -29,6 +29,6 @@
                     </div>
                     <hr>
                     <div class="av-text-center">
-                        <a class="btn btn-primary btn-lg" href="/home">GO BACK TO HOME</a>
+                        <a class="btn btn-primary btn-lg" href="/">GO BACK TO HOME</a>
                     </div>
                 </div>

@@ -33,11 +33,11 @@ const isUserLoggedin = async (req, res, next) => {
                     type: "warning",
                     content: "Your request has been denied."
                 };
-                return res.redirect("/home");
+                return res.redirect("/");
             }
         } catch (err) {
             console.log(`---USER-LOGGED-IN middleware error: ${err}.---`);
-            res.redirect("/home");
+            res.redirect("/");
         }
     }
     //For handling POST requests if not logged in
@@ -65,11 +65,11 @@ const isVendorLoggedin = async (req, res, next) => {
                     type: "warning",
                     content: "Your request has been denied."
                 };
-                return res.redirect("/home");
+                return res.redirect("/");
             }
         } catch (err) {
             console.log(`---VENDOR-LOGGED-IN middleware error: ${err}.---`);
-            res.redirect("/home");
+            res.redirect("/");
         }
     }
     req.session.message = {
@@ -92,11 +92,11 @@ const isAdminLoggedin = async (req, res, next) => {
                     type: "warning",
                     content: "Your request has been denied."
                 };
-                return res.redirect("/home");
+                return res.redirect("/");
             }
         } catch (err) {
             console.log(`---ADMIN-LOGGED-IN middleware error: ${err}.---`);
-            res.redirect("/home");
+            res.redirect("/");
         }
     }
     req.session.message = {
@@ -116,7 +116,7 @@ const isLoggedout = async (req, res, next) => {
         content: 'You are already logged in.'
     };
     if (await User.findById(req.session.user_id)) {
-        res.redirect('/home');
+        res.redirect('/');
     } else if (await Admin.findById(req.session.user_id)) {
         res.redirect('/admin');
     } else {
@@ -192,7 +192,7 @@ router.get("/signin", (req, res) => {
             type: "warning",
             content: "You're already logged in."
         };
-        res.redirect("/home");
+        res.redirect("/");
     }
 });
 
@@ -219,7 +219,7 @@ router.post("/signin", async (req, res) => {
                         content: 'Your request has been denied.'
                     };
                     redirectPath = '';
-                    return res.redirect('/home');
+                    return res.redirect('/');
                 }
                 userType = user.userType;
                 userPassword = user.password;
@@ -231,7 +231,7 @@ router.post("/signin", async (req, res) => {
                         content: 'Your request has been denied.'
                     };
                     redirectPath = '';
-                    return res.redirect('/home');
+                    return res.redirect('/');
                 }
                 userType = admin.userType;
                 userPassword = admin.password;
@@ -243,7 +243,7 @@ router.post("/signin", async (req, res) => {
                         content: 'Your request has been denied.'
                     };
                     redirectPath = '';
-                    return res.redirect('/home');
+                    return res.redirect('/');
                 }
                 userType = vendor.userType;
                 userPassword = vendor.password;
@@ -272,7 +272,7 @@ router.post("/signin", async (req, res) => {
                         type: "success",
                         content: `Welcome back ${user.name.split(' ')[0]}.`
                     };
-                    return res.redirect("/home");
+                    return res.redirect("/");
                 } else if (userType == "admin") {
                     if (redirectPath && redirectPath != '/admin') {
                         const path = redirectPath;
@@ -362,7 +362,7 @@ router.get("/logout", (req, res) => {
         type: 'warning',
         content: 'You have been logged out.'
     }
-    res.redirect("/home");
+    res.redirect("/");
 });
 
 // managing forgot password

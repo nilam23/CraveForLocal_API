@@ -1,7 +1,6 @@
 <%- include("../partials/header") %>
     <%- include("../partials/heading") %>
 
-        <hr>
         <% if(message){ %>
             <div class="alert alert-<%=message.type%> alert-dismissible" role="alert" style="text-align: center;">
                 <strong>
@@ -12,11 +11,7 @@
             </div>
             <% } %>
 
-                <h1 class="portal"><small class="text-muted"><b>VENDOR PORTAL</b></small></h1>
-                <div class="av-text-center">
-                    <a class="btn btn-danger btn-lg" href="/logout">LOG OUT</a>
-                </div>
-                <hr>
+                <br>
                 <div class="signup-form">
                     <form action="/vendor/addproduct" method="POST" enctype="multipart/form-data">
                         <h2 style="text-align: center;"><small class="text-muted"><b>Add new product</b></small></h2>
