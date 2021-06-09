@@ -3,6 +3,7 @@ const router = express.Router();
 const fs = require("fs");
 const multer = require("multer");
 const path = require("path");
+const dotenv = require("dotenv").config();
 
 // const User = require("../models/userCollection");
 // const Admin = require("../models/adminCollection");
@@ -160,6 +161,93 @@ router.post("/vendor/products/:id/delete", indexObj.isVendorLoggedin, async (req
         }
     } catch (err) {
         console.log(`---VENDOR/PRODUCT DELETING ERROR: ${err}.---`);
+        res.redirect("/vendor");
+    }
+});
+
+// Manage orders
+router.get('/vendor/orders', indexObj.isVendorLoggedin, async (req, res) => {
+    try {
+        const orders = await Order.find();
+        const items = await Item.find({ status: 'granted' });
+        var ourOrders = [];
+        orders.forEach(order => {
+            order.items.forEach(orderItem => {
+                items.forEach(item => {
+                    if (orderItem.itemID.equals(item._id) && item.vendorID.equals(req.session.user_id)) {
+                        var doc = {};
+                        doc.itemID = item._id;
+                        doc.image = item.image;
+                        doc.title = item.title;
+                        doc.totalQuantity = orderItem.totalQuantity;
+                        doc.totalPrice = orderItem.totalPrice;
+                        doc.orderedAt = order.orderedAt;
+                        doc.address = order.shippingAddress;
+                        doc.orderID = order.orderID;
+                        doc.paymentMethod = order.paymentMethod;
+                        doc.status = orderItem.status;
+                        ourOrders.push(doc);
+                    }
+                });
+            });
+        });
+        res.render('vendor/orders', { orders: ourOrders });
+    } catch (error) {
+
+    }
+});
+
+// Confirm an order
+router.post('/vendor/orders/:orderID/:itemID/confirm', indexObj.isVendorLoggedin, async (req, res) => {
+    try {
+        const { orderID, itemID } = req.params;
+        const order = await Order.findOne({ orderID: orderID });
+        const item = await Item.findById(itemID);
+        if (!order)
+            return res.render('accessDeny');
+        order.items.forEach((orderItem) => {
+            if (orderItem.itemID == itemID && orderItem.status == 'pending') {
+                item.countInStock -= orderItem.totalQuantity;
+                orderItem.status = 'confirmed';
+                req.session.message = {
+                    type: 'success',
+                    content: `The order is confirmed.`
+                }
+            }
+        });
+        await item.save();
+        await order.save();
+        res.redirect("/vendor/orders");
+    } catch (error) {
+        console.log(`-- - VENDOR: Order confirm error: ${error}.--- `);
+        res.redirect("/vendor");
+    }
+});
+
+// Cancelling an order
+router.post('/vendor/orders/:orderID/:itemID/cancel', indexObj.isVendorLoggedin, async (req, res) => {
+    try {
+        const { orderID, itemID } = req.params;
+        const order = await Order.findOne({ orderID: orderID });
+        const item = await Item.findById(itemID);
+        if (!order)
+            return res.render('accessDeny');
+        order.items.forEach(orderItem => {
+            if (orderItem.itemID == itemID && (orderItem.status == 'pending' || orderItem.status == 'confirmed')) {
+                if (orderItem.status == 'confirmed')
+                    item.countInStock += orderItem.totalQuantity;
+                orderItem.status = 'cancelled';
+                req.session.message = {
+                    type: 'success',
+                    content: `The order has been cancelled.`
+                }
+            }
+        });
+        await item.save();
+        await order.save();
+        res.redirect("/vendor/orders");
+    } catch (error) {
+        console.log(`---VENDOR: Order confirm error: ${error}.---`);
         res.redirect("/vendor");
     }
 });

@@ -455,17 +455,21 @@ router.post("/orders/:orderID/:itemID/cancel", indexObj.isUserLoggedin, async (r
     try {
         const { orderID, itemID } = req.params;
         const order = await Order.findOne({ orderID: orderID });
+        const item = await Item.findById(itemID);
         if (!order || !order.userID.equals(req.session.user_id))
             return res.render('accessDeny');
-        order.items.forEach(item => {
-            if (item.itemID == itemID && (item.status == 'pending' || item.status == 'confirmed')) {
-                item.status = 'cancelled';
+        order.items.forEach(orderItem => {
+            if (orderItem.itemID == itemID && (orderItem.status == 'pending' || orderItem.status == 'confirmed')) {
+                if (orderItem.status == 'confirmed')
+                    item.countInStock += orderItem.totalQuantity;
+                orderItem.status = 'cancelled';
                 req.session.message = {
                     type: 'success',
                     content: `Your ordered item has been cancelled.`
                 }
             }
         });
+        await item.save();
         await order.save();
         delete req.session.cache;
         res.redirect("/orders");
