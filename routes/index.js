@@ -412,6 +412,15 @@ router.post("/forgotpassword", isLoggedout, async (req, res) => {
                 subject: 'Crave For Local: Email verification link for password reset.',
                 text: `To reset your email, please click on the this link: ${link}`
             };
+            mailScript.transporter.sendMail(mailOptions, (err, info) => {
+                if (err) {
+                    req.session.message = {
+                        type: 'danger',
+                        content: 'Email could not be sent.'
+                    };
+                    return res.redirect("/forgotpassword");
+                }
+            });
             res.render("emailConfirmation");
         }
 
