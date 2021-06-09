@@ -141,7 +141,7 @@ const createAdmin = async () => {
     }
 }
 
-// createAdmin();
+createAdmin();
 
 // USER Sign up
 router.get("/signup", (req, res) => {
