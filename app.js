@@ -13,7 +13,7 @@ const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
 const vendorRoutes = require("./routes/vendor");
 
-const dbURL = process.env.MONGO_LOCAL_URL;
+const dbURL = process.env.MONGO_LOCAL_URL || process.env.MONGO_PRODUCTION_URL;
 
 mongoose
   .connect(dbURL, {
