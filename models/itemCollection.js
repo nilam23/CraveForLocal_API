@@ -29,7 +29,7 @@ const itemSchema = mongoose.Schema(
     vendorID: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "User"
+      ref: "Vendor"
     },
     status: {
       type: String,
